@@ -1,0 +1,52 @@
+# ───────────────────────────── OS / Editor ─────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.iml
+
+# ───────────────────────────── Secrets / Env ───────────────────────────
+.env
+.env.*
+!.env.example
+*.local
+secrets.*
+
+# ───────────────────────── Frontend (apps/web) ─────────────────────────
+node_modules/
+dist/
+dist-ssr/
+.vite/
+coverage/
+*.tsbuildinfo
+.eslintcache
+.vercel/
+playwright-report/
+test-results/
+
+# ─────────────────────── Backend (apps/api, Java) ──────────────────────
+target/
+build/
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+*.class
+*.log
+hs_err_pid*
+
+# ──────────────────────── AI service (apps/ai) ─────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# ───────────────────────────── Misc / Build ────────────────────────────
+*.tmp
+tmp/
+local-storage/
+uploads/

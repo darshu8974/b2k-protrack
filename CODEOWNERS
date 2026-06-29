@@ -1,0 +1,12 @@
+# Code owners for Protrack
+# Replace the placeholder owner with real GitHub handles/teams before enabling
+# required-review-by-owner branch protection.
+#
+# Default owner for everything:
+# *                       @your-org/protrack-maintainers
+#
+# Per-area ownership (uncomment and assign once the team is set up):
+# /apps/web/              @your-org/frontend
+# /apps/api/              @your-org/backend
+# /apps/ai/               @your-org/ai
+# /docs/architecture/     @your-org/architects

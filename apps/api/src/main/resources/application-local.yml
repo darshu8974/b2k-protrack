@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/protrack
+    username: protrack
+    password: protrack
+  jpa:
+    show-sql: true
+
+logging:
+  level:
+    root: INFO
+    com.protrack: DEBUG
+    org.flywaydb: INFO
