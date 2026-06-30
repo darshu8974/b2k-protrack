@@ -2,11 +2,13 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import { AppShell } from "../../components/layout/AppShell";
 import { RouteErrorBoundary } from "../../components/feedback/RouteErrorBoundary";
+import { AdminUsersPage } from "../../features/admin/AdminUsersPage";
 import { LoginPage } from "../../features/auth/LoginPage";
 import { DashboardPage } from "../../features/dashboard/DashboardPage";
 import { HealthPage } from "../../features/health/HealthPage";
 import { NotFoundPage } from "../../features/health/NotFoundPage";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { RoleRoute } from "./RoleRoute";
 
 /**
  * Route tree. Feature routes (dashboard, projects, workspace, qa, admin, ...) are added under
@@ -29,6 +31,10 @@ export const router = createBrowserRouter([
           { index: true, element: <Navigate to="/dashboard" replace /> },
           { path: "dashboard", element: <DashboardPage /> },
           { path: "health", element: <HealthPage /> },
+          {
+            element: <RoleRoute allow={["ADMIN"]} />,
+            children: [{ path: "admin/users", element: <AdminUsersPage /> }],
+          },
         ],
       },
     ],

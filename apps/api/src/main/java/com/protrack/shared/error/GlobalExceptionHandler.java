@@ -6,6 +6,7 @@ import java.util.List;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -34,6 +35,15 @@ public class GlobalExceptionHandler {
 				.toList();
 		return build(HttpStatus.UNPROCESSABLE_ENTITY, "VALIDATION_ERROR",
 				"One or more fields are invalid.", request, fieldErrors);
+	}
+
+	@ExceptionHandler(AccessDeniedException.class)
+	public ResponseEntity<Problem> handleAccessDenied(AccessDeniedException ex,
+			HttpServletRequest request) {
+		// Method-level @PreAuthorize denials are dispatched here (URL-level denials are handled by
+		// the security access-denied handler). Map both to a standard 403.
+		return build(HttpStatus.FORBIDDEN, "FORBIDDEN",
+				"You do not have permission to perform this action.", request, null);
 	}
 
 	@ExceptionHandler(Exception.class)

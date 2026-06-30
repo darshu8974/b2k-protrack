@@ -2,5 +2,6 @@
 export const paths = {
   login: "/login",
   dashboard: "/dashboard",
+  adminUsers: "/admin/users",
   health: "/health",
 } as const;
