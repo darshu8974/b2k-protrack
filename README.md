@@ -4,7 +4,8 @@ An enterprise platform that orchestrates the STEM publishing workflow **around**
 intake, AI manuscript analysis, production hand-off, PDF preflight, QA sign-off, and audit — while
 page layout stays human and offline in InDesign. AI proposes; people decide.
 
-> **Status:** Phase 1 MVP · Implementation phase · Sprint 0 (foundations).
+> **Status:** Phase 1 MVP · Implementation phase · Sprint 1 complete (authentication, JWT,
+> refresh-token rotation, and RBAC). Next: Sprint 2.
 
 ## Monorepo layout
 
@@ -48,8 +49,31 @@ Delivery is sequenced by the [Implementation Roadmap](docs/IMPLEMENTATION_ROADMA
 
 ## Local development
 
-> Detailed setup is added per app during Sprint 0. The local stack runs via
-> `infra/docker-compose.yml` (PostgreSQL + api + ai).
+**Database:** the API connects to PostgreSQL (Neon) via environment variables — copy
+`apps/api/.env.example` to `apps/api/.env` and fill in `DATABASE_URL` / `DATABASE_USERNAME` /
+`DATABASE_PASSWORD` (never commit the `.env`).
+
+**API** (Spring Boot, port 8080):
+
+```bash
+cd apps/api
+set -a && source .env && set +a   # load DB env vars (Git Bash)
+./gradlew bootRun                 # Flyway applies V1–V3 on startup
+```
+
+**Web** (React + Vite, port 5173 — the CORS-allowed origin):
+
+```bash
+cd apps/web
+npm install
+npm run dev
+```
+
+**Demo users** (all share the password `password`): `priya.anand@protrack.io` (PM),
+`marcus.reed@protrack.io` (Designer), `lena.ortiz@protrack.io` (QA), `david.cho@protrack.io` (Admin).
+
+**Tests:** `cd apps/api && ./gradlew test` (the Testcontainers context test needs Docker and is
+skipped without it); `cd apps/web && npm run build` (type-check); `cd apps/ai && pytest`.
 
 ## Contributing
 
