@@ -25,12 +25,14 @@ public class AuthService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtService jwtService;
+	private final RefreshTokenService refreshTokenService;
 
 	public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-			JwtService jwtService) {
+			JwtService jwtService, RefreshTokenService refreshTokenService) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtService = jwtService;
+		this.refreshTokenService = refreshTokenService;
 	}
 
 	/** Validate credentials, issue an access token, and return the authenticated user. */
@@ -48,16 +50,40 @@ public class AuthService {
 					"This account is not active.");
 		}
 
+		user.setLastLoginAt(Instant.now());
+		String refreshToken = refreshTokenService.issue(user.getId());
+		return issueTokens(user, refreshToken);
+	}
+
+	/**
+	 * Rotate a refresh token: revoke the presented one and issue a fresh access + refresh pair.
+	 *
+	 * <p>Intentionally not {@code @Transactional} so the rotation (and any reuse-driven family
+	 * revocation) commits inside {@link RefreshTokenService#rotate} rather than being rolled back
+	 * by an outer transaction when a 401 is signalled. The user lookup eagerly fetches roles and
+	 * permissions, so they remain readable after its transaction closes.
+	 */
+	public TokenResponse refresh(String refreshToken) {
+		RefreshTokenService.Rotation rotation = refreshTokenService.rotate(refreshToken);
+		User user = userRepository.findWithRolesById(rotation.userId())
+				.orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED",
+						"Authenticated user no longer exists."));
+		return issueTokens(user, rotation.newRawToken());
+	}
+
+	/** Revoke a refresh token (logout). Idempotent. */
+	@Transactional
+	public void logout(String refreshToken) {
+		refreshTokenService.revoke(refreshToken);
+	}
+
+	private TokenResponse issueTokens(User user, String refreshToken) {
 		List<String> roles = roleCodes(user);
 		List<String> permissions = permissionCodes(user);
-
-		String token = jwtService.generateAccessToken(
+		String accessToken = jwtService.generateAccessToken(
 				user.getId().toString(), user.getEmail(), roles, permissions);
-
-		user.setLastLoginAt(Instant.now());
-
-		return new TokenResponse(token, "Bearer", jwtService.getAccessTtlSeconds(),
-				toSummary(user, roles, permissions));
+		return new TokenResponse(accessToken, refreshToken, "Bearer",
+				jwtService.getAccessTtlSeconds(), toSummary(user, roles, permissions));
 	}
 
 	/** Return details for the currently authenticated user (subject = user id). */
