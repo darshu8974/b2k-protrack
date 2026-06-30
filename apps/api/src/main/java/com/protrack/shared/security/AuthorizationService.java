@@ -1,6 +1,7 @@
 package com.protrack.shared.security;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,6 +30,14 @@ public class AuthorizationService {
 				.filter(authority -> authority.startsWith("ROLE_"))
 				.map(authority -> authority.substring("ROLE_".length()))
 				.anyMatch(wanted::contains);
+	}
+
+	/** Role codes (without the ROLE_ prefix) held by the current user. */
+	public Set<String> currentRoles() {
+		return authorities()
+				.filter(authority -> authority.startsWith("ROLE_"))
+				.map(authority -> authority.substring("ROLE_".length()))
+				.collect(Collectors.toSet());
 	}
 
 	private Stream<String> authorities() {

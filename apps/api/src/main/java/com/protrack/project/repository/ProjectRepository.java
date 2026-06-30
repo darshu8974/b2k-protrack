@@ -14,6 +14,8 @@ public interface ProjectRepository
 	@EntityGraph(attributePaths = {"imprint", "members"})
 	Optional<Project> findWithDetailsByIdAndDeletedAtIsNull(UUID id);
 
+	Optional<Project> findByIdAndDeletedAtIsNull(UUID id);
+
 	boolean existsByIsbnAndDeletedAtIsNull(String isbn);
 
 	boolean existsByIsbnAndDeletedAtIsNullAndIdNot(String isbn, UUID id);
