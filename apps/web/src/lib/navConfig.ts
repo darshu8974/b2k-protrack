@@ -21,7 +21,7 @@ export const navConfig: Record<Role, NavSection[]> = {
       group: "WORKSPACE",
       items: [
         { label: "Dashboard", path: "/dashboard" },
-        { label: "Projects", path: "/health" },
+        { label: "Projects", path: "/projects" },
         { label: "Review queue", path: "/health" },
         { label: "Team", path: "/health" },
       ],
@@ -40,7 +40,7 @@ export const navConfig: Record<Role, NavSection[]> = {
       items: [
         { label: "Dashboard", path: "/dashboard" },
         { label: "My tasks", path: "/health" },
-        { label: "Projects", path: "/health" },
+        { label: "Projects", path: "/projects" },
         { label: "Production", path: "/health" },
       ],
     },
@@ -59,7 +59,7 @@ export const navConfig: Record<Role, NavSection[]> = {
         { label: "Dashboard", path: "/dashboard" },
         { label: "QA queue", path: "/health" },
         { label: "PDF reviews", path: "/health" },
-        { label: "Projects", path: "/health" },
+        { label: "Projects", path: "/projects" },
       ],
     },
     {
@@ -75,7 +75,7 @@ export const navConfig: Record<Role, NavSection[]> = {
       group: "WORKSPACE",
       items: [
         { label: "Dashboard", path: "/dashboard" },
-        { label: "Projects", path: "/health" },
+        { label: "Projects", path: "/projects" },
         { label: "Users & roles", path: "/admin/users" },
         { label: "Audit log", path: "/health" },
       ],

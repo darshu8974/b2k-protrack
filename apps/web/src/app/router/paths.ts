@@ -2,6 +2,9 @@
 export const paths = {
   login: "/login",
   dashboard: "/dashboard",
+  projects: "/projects",
+  projectNew: "/projects/new",
+  project: (id: string) => `/projects/${id}`,
   adminUsers: "/admin/users",
   health: "/health",
 } as const;

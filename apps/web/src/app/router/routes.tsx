@@ -7,6 +7,9 @@ import { LoginPage } from "../../features/auth/LoginPage";
 import { DashboardPage } from "../../features/dashboard/DashboardPage";
 import { HealthPage } from "../../features/health/HealthPage";
 import { NotFoundPage } from "../../features/health/NotFoundPage";
+import { CreateProjectPage } from "../../features/projects/pages/CreateProjectPage";
+import { ProjectDetailsPage } from "../../features/projects/pages/ProjectDetailsPage";
+import { ProjectsListPage } from "../../features/projects/pages/ProjectsListPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { RoleRoute } from "./RoleRoute";
 
@@ -31,6 +34,12 @@ export const router = createBrowserRouter([
           { index: true, element: <Navigate to="/dashboard" replace /> },
           { path: "dashboard", element: <DashboardPage /> },
           { path: "health", element: <HealthPage /> },
+          { path: "projects", element: <ProjectsListPage /> },
+          {
+            element: <RoleRoute allow={["PM", "ADMIN"]} />,
+            children: [{ path: "projects/new", element: <CreateProjectPage /> }],
+          },
+          { path: "projects/:id", element: <ProjectDetailsPage /> },
           {
             element: <RoleRoute allow={["ADMIN"]} />,
             children: [{ path: "admin/users", element: <AdminUsersPage /> }],
