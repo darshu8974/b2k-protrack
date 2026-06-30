@@ -7,6 +7,7 @@ import com.protrack.shared.security.RestAuthenticationEntryPoint;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -35,7 +36,6 @@ public class SecurityConfig {
 	/** Public paths reachable without authentication. */
 	private static final String[] PUBLIC_PATHS = {
 			"/api/v1/health",
-			"/api/v1/auth/**", // reserved for login/refresh (Task 1.3+)
 			"/actuator/**",
 			"/v3/api-docs/**",
 			"/swagger-ui/**",
@@ -74,6 +74,7 @@ public class SecurityConfig {
 						session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers(PUBLIC_PATHS).permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
 						.anyRequest().authenticated())
 				.exceptionHandling(handling -> handling
 						.authenticationEntryPoint(authenticationEntryPoint)

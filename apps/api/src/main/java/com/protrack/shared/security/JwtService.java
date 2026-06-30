@@ -43,6 +43,11 @@ public class JwtService {
 				.compact();
 	}
 
+	/** Access-token lifetime in seconds (returned to clients as expiresIn). */
+	public long getAccessTtlSeconds() {
+		return accessTtlSeconds;
+	}
+
 	/** Parse and verify a token, returning its claims. Throws JwtException if invalid/expired. */
 	public Claims parse(String token) {
 		return Jwts.parser()
