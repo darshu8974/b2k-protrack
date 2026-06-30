@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 /**
  * Maps exceptions to the standardized {@link Problem} body (REST API Specification §1.5).
@@ -35,6 +36,13 @@ public class GlobalExceptionHandler {
 				.toList();
 		return build(HttpStatus.UNPROCESSABLE_ENTITY, "VALIDATION_ERROR",
 				"One or more fields are invalid.", request, fieldErrors);
+	}
+
+	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
+	public ResponseEntity<Problem> handleTypeMismatch(MethodArgumentTypeMismatchException ex,
+			HttpServletRequest request) {
+		return build(HttpStatus.BAD_REQUEST, "BAD_REQUEST",
+				"Invalid value for parameter '" + ex.getName() + "'.", request, null);
 	}
 
 	@ExceptionHandler(AccessDeniedException.class)
