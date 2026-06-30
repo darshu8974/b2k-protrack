@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AppShell } from "../../components/layout/AppShell";
 import { RouteErrorBoundary } from "../../components/feedback/RouteErrorBoundary";
 import { LoginPage } from "../../features/auth/LoginPage";
+import { DashboardPage } from "../../features/dashboard/DashboardPage";
 import { HealthPage } from "../../features/health/HealthPage";
 import { NotFoundPage } from "../../features/health/NotFoundPage";
 import { ProtectedRoute } from "./ProtectedRoute";
@@ -25,7 +26,8 @@ export const router = createBrowserRouter([
       {
         element: <AppShell />,
         children: [
-          { index: true, element: <Navigate to="/health" replace /> },
+          { index: true, element: <Navigate to="/dashboard" replace /> },
+          { path: "dashboard", element: <DashboardPage /> },
           { path: "health", element: <HealthPage /> },
         ],
       },

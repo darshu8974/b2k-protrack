@@ -7,6 +7,9 @@ Thumbs.db
 !.vscode/extensions.json
 *.iml
 
+# Local preview/dev launch config (machine-specific, not committed)
+.claude/launch.json
+
 # ───────────────────────────── Secrets / Env ───────────────────────────
 .env
 .env.*

@@ -25,7 +25,7 @@ export function TopBar() {
           </Typography>
         </Box>
         <Tooltip title="Sign out">
-          <IconButton onClick={logout}>
+          <IconButton onClick={() => void logout()}>
             <Avatar sx={{ width: 32, height: 32, bgcolor: ROLE_COLORS[role], fontSize: 14 }}>
               {user?.avatarInitials ?? "?"}
             </Avatar>

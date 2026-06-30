@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Button, Card, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, Card, Stack, TextField, Typography } from "@mui/material";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 import { paths } from "../../app/router/paths";
-import { ROLE_COLORS } from "../../lib/constants";
+import type { AppError } from "../../types/api";
 import { useAuth } from "./useAuth";
 
 const loginSchema = z.object({
@@ -15,13 +16,16 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-/**
- * Login screen. The form (react-hook-form + zod) is in place; Sprint 0 performs a demo sign-in
- * since the auth backend lands in Sprint 1, where this is wired to POST /auth/login.
- */
+interface FromState {
+  from?: string;
+}
+
+/** Login screen wired to POST /api/v1/auth/login. On success, redirects to the dashboard. */
 export function LoginPage() {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
@@ -29,24 +33,24 @@ export function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "demo@protrack.io", password: "demo-password" },
+    defaultValues: { email: "priya.anand@protrack.io", password: "password" },
   });
 
-  const onSubmit = handleSubmit(() => {
-    // Sprint-0 demo sign-in (replaced by real auth in Sprint 1).
-    login(
-      {
-        id: "demo-user",
-        fullName: "Demo User",
-        email: "demo@protrack.io",
-        roles: ["PM"],
-        permissions: [],
-        avatarInitials: "DU",
-        avatarColor: ROLE_COLORS.PM,
-      },
-      "demo-access-token",
-    );
-    navigate(paths.health, { replace: true });
+  // Authenticated users shouldn't see the login page.
+  if (isAuthenticated) {
+    return <Navigate to={paths.dashboard} replace />;
+  }
+
+  const onSubmit = handleSubmit(async (values) => {
+    setSubmitError(null);
+    try {
+      await login(values.email, values.password);
+      const from = (location.state as FromState | null)?.from;
+      navigate(from && from !== paths.login ? from : paths.dashboard, { replace: true });
+    } catch (error) {
+      const appError = error as AppError;
+      setSubmitError(appError?.message ?? "Sign in failed. Please try again.");
+    }
   });
 
   return (
@@ -70,6 +74,7 @@ export function LoginPage() {
 
         <form onSubmit={onSubmit} noValidate>
           <Stack spacing={2}>
+            {submitError && <Alert severity="error">{submitError}</Alert>}
             <TextField
               label="Work email"
               type="email"
@@ -87,7 +92,7 @@ export function LoginPage() {
               {...register("password")}
             />
             <Button type="submit" variant="contained" size="large" disabled={isSubmitting}>
-              Sign in
+              {isSubmitting ? "Signing in…" : "Sign in"}
             </Button>
           </Stack>
         </form>
