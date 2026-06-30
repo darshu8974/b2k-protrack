@@ -3,6 +3,13 @@ spring:
     name: protrack-api
   profiles:
     default: local
+  # Datasource — Neon PostgreSQL, supplied entirely via environment variables.
+  # Never hardcode credentials here. Set DATABASE_URL / DATABASE_USERNAME / DATABASE_PASSWORD.
+  # Empty defaults let the Testcontainers integration test inject its own connection.
+  datasource:
+    url: ${DATABASE_URL:}
+    username: ${DATABASE_USERNAME:}
+    password: ${DATABASE_PASSWORD:}
   jpa:
     open-in-view: false
     hibernate:

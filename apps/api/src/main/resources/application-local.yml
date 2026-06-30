@@ -1,8 +1,5 @@
+# Datasource is configured in application.yml via DATABASE_URL / DATABASE_USERNAME / DATABASE_PASSWORD.
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/protrack
-    username: protrack
-    password: protrack
   jpa:
     show-sql: true
 

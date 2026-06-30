@@ -1,8 +1,6 @@
+# Datasource is configured in application.yml via DATABASE_URL / DATABASE_USERNAME / DATABASE_PASSWORD
+# (set these as environment variables on Render too).
 spring:
-  datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
   jpa:
     show-sql: false
 
