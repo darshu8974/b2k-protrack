@@ -19,12 +19,19 @@ repositories {
 }
 
 extra["springdocVersion"] = "2.7.0"
+extra["jjwtVersion"] = "0.12.6"
 
 dependencies {
 	// Web + API
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${property("springdocVersion")}")
+
+	// Security + JWT
+	implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("io.jsonwebtoken:jjwt-api:${property("jjwtVersion")}")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:${property("jjwtVersion")}")
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson:${property("jjwtVersion")}")
 
 	// Persistence + migrations
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -41,6 +48,7 @@ dependencies {
 
 	// Testing
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.springframework.security:spring-security-test")
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
 	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.testcontainers:postgresql")
