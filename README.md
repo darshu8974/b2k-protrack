@@ -4,8 +4,8 @@ An enterprise platform that orchestrates the STEM publishing workflow **around**
 intake, AI manuscript analysis, production hand-off, PDF preflight, QA sign-off, and audit — while
 page layout stays human and offline in InDesign. AI proposes; people decide.
 
-> **Status:** Phase 1 MVP · Implementation phase · Sprint 1 complete (authentication, JWT,
-> refresh-token rotation, and RBAC). Next: Sprint 2.
+> **Status:** Phase 1 MVP · Implementation phase · Sprint 2 complete (project management,
+> workflow engine, dashboard, and audit trail) on top of Sprint 1 (auth + RBAC). Next: Sprint 3.
 
 ## Monorepo layout
 

@@ -1,7 +1,6 @@
 package com.protrack.audit.repository;
 
 import com.protrack.audit.domain.AuditEvent;
-import java.time.Instant;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -21,13 +20,5 @@ public final class AuditEventSpecifications {
 
 	public static Specification<AuditEvent> hasEventType(String eventType) {
 		return (root, query, cb) -> cb.equal(root.get("eventType"), eventType);
-	}
-
-	public static Specification<AuditEvent> createdFrom(Instant from) {
-		return (root, query, cb) -> cb.greaterThanOrEqualTo(root.get("createdAt"), from);
-	}
-
-	public static Specification<AuditEvent> createdTo(Instant to) {
-		return (root, query, cb) -> cb.lessThanOrEqualTo(root.get("createdAt"), to);
 	}
 }
