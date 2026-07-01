@@ -44,3 +44,14 @@ export const PUBLICATION_TYPE_LABEL: Record<PublicationType, string> = {
   JOURNAL: "Journal",
   REFERENCE: "Reference",
 };
+
+export const AUDIT_EVENT_LABEL: Record<string, string> = {
+  PROJECT_CREATED: "Project created",
+  PROJECT_UPDATED: "Project updated",
+  MEMBERS_ASSIGNED: "Members assigned",
+  STAGE_CHANGED: "Stage changed",
+};
+
+export function auditEventLabel(eventType: string): string {
+  return AUDIT_EVENT_LABEL[eventType] ?? eventType;
+}

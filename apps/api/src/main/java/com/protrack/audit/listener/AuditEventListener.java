@@ -1,0 +1,75 @@
+package com.protrack.audit.listener;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.protrack.audit.domain.AuditEvent;
+import com.protrack.audit.repository.AuditEventRepository;
+import com.protrack.shared.events.ProjectEvents;
+import java.util.Map;
+import java.util.UUID;
+import org.slf4j.MDC;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
+
+/**
+ * Subscribes to domain events and writes immutable audit rows. Runs synchronously within the
+ * publishing transaction, so an audit row exists exactly when the business change commits.
+ */
+@Component
+public class AuditEventListener {
+
+	private static final String ENTITY_PROJECT = "PROJECT";
+	private static final String ACTOR_USER = "USER";
+
+	private final AuditEventRepository auditEventRepository;
+	private final ObjectMapper objectMapper;
+
+	public AuditEventListener(AuditEventRepository auditEventRepository, ObjectMapper objectMapper) {
+		this.auditEventRepository = auditEventRepository;
+		this.objectMapper = objectMapper;
+	}
+
+	@EventListener
+	public void onProjectCreated(ProjectEvents.ProjectCreated event) {
+		record(event.organizationId(), event.projectId(), event.actorId(), "PROJECT_CREATED",
+				"Project created", Map.of("title", event.title()));
+	}
+
+	@EventListener
+	public void onProjectUpdated(ProjectEvents.ProjectUpdated event) {
+		record(event.organizationId(), event.projectId(), event.actorId(), "PROJECT_UPDATED",
+				"Project details updated", null);
+	}
+
+	@EventListener
+	public void onMembersAssigned(ProjectEvents.ProjectMembersAssigned event) {
+		record(event.organizationId(), event.projectId(), event.actorId(), "MEMBERS_ASSIGNED",
+				"Team updated (%d member(s))".formatted(event.memberCount()),
+				Map.of("memberCount", event.memberCount()));
+	}
+
+	@EventListener
+	public void onStageChanged(ProjectEvents.ProjectStageChanged event) {
+		record(event.organizationId(), event.projectId(), event.actorId(), "STAGE_CHANGED",
+				"%s → %s".formatted(event.fromStage(), event.toStage()),
+				Map.of("fromStage", event.fromStage(), "toStage", event.toStage(),
+						"role", event.triggeredRole()));
+	}
+
+	private void record(UUID organizationId, UUID projectId, UUID actorId, String eventType,
+			String summary, Map<String, ?> metadata) {
+		auditEventRepository.save(new AuditEvent(
+				UUID.randomUUID(), organizationId, projectId, actorId, ACTOR_USER, eventType,
+				ENTITY_PROJECT, projectId, summary, toJson(metadata), MDC.get("traceId")));
+	}
+
+	private String toJson(Map<String, ?> metadata) {
+		if (metadata == null) {
+			return null;
+		}
+		try {
+			return objectMapper.writeValueAsString(metadata);
+		} catch (Exception ex) {
+			return null;
+		}
+	}
+}

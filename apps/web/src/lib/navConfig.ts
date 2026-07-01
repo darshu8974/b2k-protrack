@@ -77,7 +77,7 @@ export const navConfig: Record<Role, NavSection[]> = {
         { label: "Dashboard", path: "/dashboard" },
         { label: "Projects", path: "/projects" },
         { label: "Users & roles", path: "/admin/users" },
-        { label: "Audit log", path: "/health" },
+        { label: "Audit log", path: "/admin/audit" },
       ],
     },
     {

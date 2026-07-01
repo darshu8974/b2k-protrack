@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AppShell } from "../../components/layout/AppShell";
 import { RouteErrorBoundary } from "../../components/feedback/RouteErrorBoundary";
 import { AdminUsersPage } from "../../features/admin/AdminUsersPage";
+import { AuditLogPage } from "../../features/admin/AuditLogPage";
 import { LoginPage } from "../../features/auth/LoginPage";
 import { DashboardPage } from "../../features/dashboard/DashboardPage";
 import { HealthPage } from "../../features/health/HealthPage";
@@ -42,7 +43,10 @@ export const router = createBrowserRouter([
           { path: "projects/:id", element: <ProjectDetailsPage /> },
           {
             element: <RoleRoute allow={["ADMIN"]} />,
-            children: [{ path: "admin/users", element: <AdminUsersPage /> }],
+            children: [
+              { path: "admin/users", element: <AdminUsersPage /> },
+              { path: "admin/audit", element: <AuditLogPage /> },
+            ],
           },
         ],
       },

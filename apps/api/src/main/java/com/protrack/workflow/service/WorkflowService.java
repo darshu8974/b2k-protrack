@@ -7,6 +7,7 @@ import com.protrack.project.spi.ProjectFacade.ProjectStageInfo;
 import com.protrack.shared.error.ApiException;
 import com.protrack.shared.error.ConflictException;
 import com.protrack.shared.error.NotFoundException;
+import com.protrack.shared.events.ProjectEvents;
 import com.protrack.shared.security.AuthorizationService;
 import com.protrack.workflow.domain.ProjectStageHistory;
 import com.protrack.workflow.domain.StageTransition;
@@ -22,6 +23,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,15 +39,17 @@ public class WorkflowService {
 	private final AuthorizationService authorizationService;
 	private final ProjectStageHistoryRepository historyRepository;
 	private final WorkflowStageRepository workflowStageRepository;
+	private final ApplicationEventPublisher eventPublisher;
 
 	public WorkflowService(ProjectFacade projectFacade, IdentityFacade identityFacade,
 			AuthorizationService authorizationService, ProjectStageHistoryRepository historyRepository,
-			WorkflowStageRepository workflowStageRepository) {
+			WorkflowStageRepository workflowStageRepository, ApplicationEventPublisher eventPublisher) {
 		this.projectFacade = projectFacade;
 		this.identityFacade = identityFacade;
 		this.authorizationService = authorizationService;
 		this.historyRepository = historyRepository;
 		this.workflowStageRepository = workflowStageRepository;
+		this.eventPublisher = eventPublisher;
 	}
 
 	/** Validate, authorize, apply, and record a stage transition. */
@@ -73,6 +77,9 @@ public class WorkflowService {
 
 		ProjectStageHistory history = historyRepository.save(new ProjectStageHistory(
 				UUID.randomUUID(), projectId, fromStage, toStage, triggeredRole, currentUserId, note));
+
+		eventPublisher.publishEvent(new ProjectEvents.ProjectStageChanged(
+				info.organizationId(), projectId, currentUserId, fromStage, toStage, triggeredRole));
 
 		return new TransitionResponse(projectId.toString(), fromStage, toStage, triggeredRole,
 				rule.approvalGate(), history.getOccurredAt());

@@ -13,6 +13,7 @@ import { ErrorState } from "../../../components/feedback/ErrorState";
 import { LoadingState } from "../../../components/feedback/LoadingState";
 import { StagePipeline } from "../../../components/data/StagePipeline";
 import {
+  auditEventLabel,
   PRIORITY_COLOR,
   PRIORITY_LABEL,
   PUBLICATION_TYPE_LABEL,
@@ -20,6 +21,7 @@ import {
   STATUS_COLOR,
   STATUS_LABEL,
 } from "../../../lib/labels";
+import { useProjectActivity } from "../../audit/hooks";
 import { useWorkflowStages } from "../../reference/hooks";
 import { useProject, useProjectTimeline } from "../hooks";
 
@@ -40,6 +42,7 @@ export function ProjectDetailsPage() {
   const { id = "" } = useParams();
   const { data: project, isLoading, isError } = useProject(id);
   const { data: timeline } = useProjectTimeline(id);
+  const { data: activity } = useProjectActivity(id);
   const { data: stages } = useWorkflowStages();
 
   if (isLoading) {
@@ -155,6 +158,32 @@ export function ProjectDetailsPage() {
         ) : (
           <Typography variant="body2" color="text.secondary">
             No transitions yet.
+          </Typography>
+        )}
+      </Card>
+
+      {/* Activity (audit trail) */}
+      <Card sx={{ p: 2.5 }}>
+        <Typography variant="subtitle1" sx={{ mb: 1.5 }}>
+          Activity
+        </Typography>
+        {activity && activity.length > 0 ? (
+          <Stack spacing={1}>
+            {activity.map((entry) => (
+              <Stack key={entry.id} direction="row" spacing={1} alignItems="baseline">
+                <Chip size="small" variant="outlined" label={auditEventLabel(entry.eventType)} />
+                <Typography variant="body2" sx={{ flex: 1 }}>
+                  {entry.summary}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {entry.actorName ?? "—"} · {new Date(entry.createdAt).toLocaleString()}
+                </Typography>
+              </Stack>
+            ))}
+          </Stack>
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            No activity yet.
           </Typography>
         )}
       </Card>

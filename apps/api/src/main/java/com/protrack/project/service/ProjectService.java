@@ -20,6 +20,7 @@ import com.protrack.project.web.dto.UpdateProjectRequest;
 import com.protrack.shared.error.ApiException;
 import com.protrack.shared.error.ConflictException;
 import com.protrack.shared.error.NotFoundException;
+import com.protrack.shared.events.ProjectEvents;
 import com.protrack.shared.web.PageResponse;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -47,13 +49,16 @@ public class ProjectService {
 	private final ImprintRepository imprintRepository;
 	private final IdentityFacade identityFacade;
 	private final ProjectMapper mapper;
+	private final ApplicationEventPublisher eventPublisher;
 
 	public ProjectService(ProjectRepository projectRepository, ImprintRepository imprintRepository,
-			IdentityFacade identityFacade, ProjectMapper mapper) {
+			IdentityFacade identityFacade, ProjectMapper mapper,
+			ApplicationEventPublisher eventPublisher) {
 		this.projectRepository = projectRepository;
 		this.imprintRepository = imprintRepository;
 		this.identityFacade = identityFacade;
 		this.mapper = mapper;
+		this.eventPublisher = eventPublisher;
 	}
 
 	@Transactional
@@ -95,6 +100,8 @@ public class ProjectService {
 		}
 
 		Project saved = projectRepository.save(project);
+		eventPublisher.publishEvent(new ProjectEvents.ProjectCreated(
+				organizationId, saved.getId(), currentUserId, saved.getTitle()));
 		return buildResponse(saved);
 	}
 
@@ -150,7 +157,10 @@ public class ProjectService {
 		}
 		project.setUpdatedBy(currentUserId);
 
-		return buildResponse(projectRepository.save(project));
+		Project saved = projectRepository.save(project);
+		eventPublisher.publishEvent(new ProjectEvents.ProjectUpdated(
+				saved.getOrganizationId(), saved.getId(), currentUserId));
+		return buildResponse(saved);
 	}
 
 	@Transactional(readOnly = true)
@@ -215,6 +225,8 @@ public class ProjectService {
 		}
 		project.setUpdatedBy(currentUserId);
 		Project saved = projectRepository.save(project);
+		eventPublisher.publishEvent(new ProjectEvents.ProjectMembersAssigned(
+				saved.getOrganizationId(), saved.getId(), currentUserId, saved.getMembers().size()));
 
 		Map<UUID, UserBrief> briefs = identityFacade.findBriefs(
 				saved.getMembers().stream().map(ProjectMember::getUserId).toList());
