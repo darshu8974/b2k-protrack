@@ -12,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 /**
  * Maps exceptions to the standardized {@link Problem} body (REST API Specification §1.5).
@@ -43,6 +44,14 @@ public class GlobalExceptionHandler {
 			HttpServletRequest request) {
 		return build(HttpStatus.BAD_REQUEST, "BAD_REQUEST",
 				"Invalid value for parameter '" + ex.getName() + "'.", request, null);
+	}
+
+	@ExceptionHandler(MaxUploadSizeExceededException.class)
+	public ResponseEntity<Problem> handleUploadTooLarge(MaxUploadSizeExceededException ex,
+			HttpServletRequest request) {
+		// Container-level cap breached. The API Specification returns 422 for size violations.
+		return build(HttpStatus.UNPROCESSABLE_ENTITY, "FILE_TOO_LARGE",
+				"The uploaded file exceeds the maximum allowed size.", request, null);
 	}
 
 	@ExceptionHandler(AccessDeniedException.class)

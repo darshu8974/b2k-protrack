@@ -3,6 +3,8 @@ package com.protrack.audit.listener;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.protrack.audit.domain.AuditEvent;
 import com.protrack.audit.repository.AuditEventRepository;
+import com.protrack.shared.events.FileEvents;
+import com.protrack.shared.events.PackageEvents;
 import com.protrack.shared.events.ProjectEvents;
 import java.util.Map;
 import java.util.UUID;
@@ -18,6 +20,8 @@ import org.springframework.stereotype.Component;
 public class AuditEventListener {
 
 	private static final String ENTITY_PROJECT = "PROJECT";
+	private static final String ENTITY_FILE = "FILE";
+	private static final String ENTITY_PACKAGE = "PACKAGE";
 	private static final String ACTOR_USER = "USER";
 
 	private final AuditEventRepository auditEventRepository;
@@ -55,11 +59,36 @@ public class AuditEventListener {
 						"role", event.triggeredRole()));
 	}
 
+	@EventListener
+	public void onFileUploaded(FileEvents.FileUploaded event) {
+		save(event.organizationId(), event.projectId(), event.actorId(), "FILE_UPLOADED",
+				ENTITY_FILE, event.documentId(),
+				"%s uploaded (v%d)".formatted(event.fileName(), event.versionNo()),
+				Map.of("documentId", event.documentId().toString(),
+						"versionId", event.versionId().toString(),
+						"docType", event.docType(), "fileName", event.fileName(),
+						"versionNo", event.versionNo()));
+	}
+
+	@EventListener
+	public void onPackageAssembled(PackageEvents.PackageAssembled event) {
+		save(event.organizationId(), event.projectId(), event.actorId(), "PACKAGE_ASSEMBLED",
+				ENTITY_PACKAGE, event.packageId(),
+				"Production package assembled (%d item(s))".formatted(event.itemCount()),
+				Map.of("packageId", event.packageId().toString(), "itemCount", event.itemCount(),
+						"totalSizeBytes", event.totalSizeBytes()));
+	}
+
 	private void record(UUID organizationId, UUID projectId, UUID actorId, String eventType,
 			String summary, Map<String, ?> metadata) {
+		save(organizationId, projectId, actorId, eventType, ENTITY_PROJECT, projectId, summary, metadata);
+	}
+
+	private void save(UUID organizationId, UUID projectId, UUID actorId, String eventType,
+			String entityType, UUID entityId, String summary, Map<String, ?> metadata) {
 		auditEventRepository.save(new AuditEvent(
 				UUID.randomUUID(), organizationId, projectId, actorId, ACTOR_USER, eventType,
-				ENTITY_PROJECT, projectId, summary, toJson(metadata), MDC.get("traceId")));
+				entityType, entityId, summary, toJson(metadata), MDC.get("traceId")));
 	}
 
 	private String toJson(Map<String, ?> metadata) {

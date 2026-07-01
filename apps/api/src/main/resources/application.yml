@@ -26,6 +26,12 @@ spring:
       pageable:
         default-page-size: 20
         max-page-size: 100
+  # Multipart uploads (documents/manuscripts). Hard container caps; the files module also
+  # enforces per-type size limits at the service layer (returning 422 on violation).
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 210MB
 
 server:
   port: ${PORT:8080}
