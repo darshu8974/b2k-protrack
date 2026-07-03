@@ -4,8 +4,9 @@ An enterprise platform that orchestrates the STEM publishing workflow **around**
 intake, AI manuscript analysis, production hand-off, PDF preflight, QA sign-off, and audit — while
 page layout stays human and offline in InDesign. AI proposes; people decide.
 
-> **Status:** Phase 1 MVP · Implementation phase · Sprint 2 complete (project management,
-> workflow engine, dashboard, and audit trail) on top of Sprint 1 (auth + RBAC). Next: Sprint 3.
+> **Status:** Phase 1 MVP · Implementation phase · Sprint 3 complete (document upload, immutable
+> versioning, and the production-package hand-off) on top of Sprint 2 (project management, workflow,
+> dashboard, audit) and Sprint 1 (auth + RBAC). Next: Sprint 4 (AI manuscript analysis).
 
 ## Monorepo layout
 
@@ -58,7 +59,7 @@ Delivery is sequenced by the [Implementation Roadmap](docs/IMPLEMENTATION_ROADMA
 ```bash
 cd apps/api
 set -a && source .env && set +a   # load DB env vars (Git Bash)
-./gradlew bootRun                 # Flyway applies V1–V3 on startup
+./gradlew bootRun                 # Flyway applies V1–V6 on startup
 ```
 
 **Web** (React + Vite, port 5173 — the CORS-allowed origin):

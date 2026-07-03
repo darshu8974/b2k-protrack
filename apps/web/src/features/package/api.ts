@@ -1,13 +1,6 @@
 import { apiClient } from "../../api/axios";
 import type { ProductionPackage } from "../../types/package";
 
-export interface AddPackageItemBody {
-  documentId: string;
-  itemType?: string;
-  label?: string;
-  sortOrder?: number;
-}
-
 export async function getPackage(projectId: string): Promise<ProductionPackage> {
   const { data } = await apiClient.get<ProductionPackage>(`/projects/${projectId}/package`);
   return data;
@@ -15,17 +8,6 @@ export async function getPackage(projectId: string): Promise<ProductionPackage> 
 
 export async function assemblePackage(projectId: string): Promise<ProductionPackage> {
   const { data } = await apiClient.post<ProductionPackage>(`/projects/${projectId}/package`);
-  return data;
-}
-
-export async function addPackageItem(
-  projectId: string,
-  body: AddPackageItemBody,
-): Promise<ProductionPackage> {
-  const { data } = await apiClient.post<ProductionPackage>(
-    `/projects/${projectId}/package/items`,
-    body,
-  );
   return data;
 }
 
