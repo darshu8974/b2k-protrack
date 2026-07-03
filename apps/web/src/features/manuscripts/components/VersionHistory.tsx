@@ -1,0 +1,120 @@
+import DownloadIcon from "@mui/icons-material/Download";
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  IconButton,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+
+import { Can } from "../../../components/auth/Can";
+import { useDownload } from "../../../hooks/useDownload";
+import { formatBytes } from "../../../lib/format";
+import type { FileVersion } from "../../../types/files";
+import { versionDownloadUrl } from "../api";
+import { useDocumentVersions, useSetCurrentVersion } from "../hooks";
+
+interface VersionHistoryProps {
+  projectId: string;
+  documentId: string;
+}
+
+export function VersionHistory({ projectId, documentId }: VersionHistoryProps) {
+  const { data: versions, isLoading } = useDocumentVersions(documentId);
+  const setCurrent = useSetCurrentVersion(projectId);
+  const { download, downloading } = useDownload();
+
+  if (isLoading) {
+    return (
+      <Box sx={{ p: 2 }}>
+        <CircularProgress size={20} />
+      </Box>
+    );
+  }
+  if (!versions || versions.length === 0) {
+    return (
+      <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+        No versions yet.
+      </Typography>
+    );
+  }
+
+  const handleDownload = (version: FileVersion) =>
+    download(versionDownloadUrl(version.id), version.fileName, version.id);
+
+  return (
+    <Table size="small">
+      <TableHead>
+        <TableRow>
+          <TableCell>Version</TableCell>
+          <TableCell>File</TableCell>
+          <TableCell>Size</TableCell>
+          <TableCell>Uploaded by</TableCell>
+          <TableCell>When</TableCell>
+          <TableCell align="right">Actions</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {versions.map((version) => (
+          <TableRow key={version.id} hover>
+            <TableCell>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  v{version.versionNo}
+                </Typography>
+                {version.current && <Chip size="small" color="success" label="Current" />}
+              </Stack>
+            </TableCell>
+            <TableCell>
+              <Typography variant="body2">{version.fileName}</Typography>
+            </TableCell>
+            <TableCell>{formatBytes(version.sizeBytes)}</TableCell>
+            <TableCell>{version.uploadedByName ?? "—"}</TableCell>
+            <TableCell>{new Date(version.createdAt).toLocaleString()}</TableCell>
+            <TableCell align="right">
+              <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
+                {!version.current && (
+                  <Can roles={["PM", "ADMIN"]}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      disabled={setCurrent.isPending}
+                      onClick={() =>
+                        setCurrent.mutate({ documentId, versionId: version.id })
+                      }
+                    >
+                      Make current
+                    </Button>
+                  </Can>
+                )}
+                <Tooltip title="Download">
+                  <span>
+                    <IconButton
+                      size="small"
+                      disabled={downloading === version.id}
+                      onClick={() => handleDownload(version)}
+                    >
+                      {downloading === version.id ? (
+                        <CircularProgress size={16} />
+                      ) : (
+                        <DownloadIcon fontSize="small" />
+                      )}
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              </Stack>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}

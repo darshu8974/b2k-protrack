@@ -1,3 +1,5 @@
+import type { DocType } from "../types/files";
+import type { PackageStatus } from "../types/package";
 import type { Priority, ProjectStatus, PublicationType, Stage } from "../types/project";
 
 type ChipColor = "default" | "primary" | "secondary" | "success" | "warning" | "error" | "info";
@@ -45,11 +47,39 @@ export const PUBLICATION_TYPE_LABEL: Record<PublicationType, string> = {
   REFERENCE: "Reference",
 };
 
+export const DOC_TYPE_LABEL: Record<DocType, string> = {
+  MANUSCRIPT: "Manuscript",
+  PRODUCTION_PDF: "Production PDF",
+  STRUCTURED_XML: "Structured XML",
+  FIGURES_MANIFEST: "Figures manifest",
+  OTHER: "Other",
+};
+
+export function docTypeLabel(docType: string): string {
+  return DOC_TYPE_LABEL[docType as DocType] ?? docType;
+}
+
+export const PACKAGE_STATUS_LABEL: Record<PackageStatus, string> = {
+  DRAFT: "Draft",
+  ASSEMBLING: "Assembling",
+  ASSEMBLED: "Assembled",
+  FAILED: "Failed",
+};
+
+export const PACKAGE_STATUS_COLOR: Record<PackageStatus, ChipColor> = {
+  DRAFT: "default",
+  ASSEMBLING: "warning",
+  ASSEMBLED: "success",
+  FAILED: "error",
+};
+
 export const AUDIT_EVENT_LABEL: Record<string, string> = {
   PROJECT_CREATED: "Project created",
   PROJECT_UPDATED: "Project updated",
   MEMBERS_ASSIGNED: "Members assigned",
   STAGE_CHANGED: "Stage changed",
+  FILE_UPLOADED: "File uploaded",
+  PACKAGE_ASSEMBLED: "Package assembled",
 };
 
 export function auditEventLabel(eventType: string): string {
