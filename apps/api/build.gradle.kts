@@ -20,6 +20,7 @@ repositories {
 
 extra["springdocVersion"] = "2.7.0"
 extra["jjwtVersion"] = "0.12.6"
+extra["resilience4jVersion"] = "2.2.0"
 
 dependencies {
 	// Web + API
@@ -38,6 +39,10 @@ dependencies {
 	implementation("org.flywaydb:flyway-core")
 	implementation("org.flywaydb:flyway-database-postgresql")
 	runtimeOnly("org.postgresql:postgresql")
+
+	// Resilience for the outbound AI service call (retry + circuit breaker over RestClient)
+	implementation("io.github.resilience4j:resilience4j-spring-boot3:${property("resilience4jVersion")}")
+	implementation("org.springframework.boot:spring-boot-starter-aop")
 
 	// Observability
 	implementation("org.springframework.boot:spring-boot-starter-actuator")

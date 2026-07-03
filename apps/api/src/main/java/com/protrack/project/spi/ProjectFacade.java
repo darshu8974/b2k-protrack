@@ -13,7 +13,14 @@ public interface ProjectFacade {
 	record ProjectStageInfo(UUID projectId, String currentStage, UUID organizationId, UUID ownerId) {
 	}
 
+	/** Project context for scoping AI work (passed to the AI service, no entity leakage). */
+	record ProjectContextInfo(UUID projectId, UUID organizationId, String title,
+			String publicationType, String discipline) {
+	}
+
 	Optional<ProjectStageInfo> findStageInfo(UUID projectId);
+
+	Optional<ProjectContextInfo> findContext(UUID projectId);
 
 	/** Move a project to a new stage (and mark it COMPLETED when that stage is reached). */
 	void updateCurrentStage(UUID projectId, String newStage, UUID actedBy);

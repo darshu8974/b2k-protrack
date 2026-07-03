@@ -31,6 +31,15 @@ public class ProjectFacadeImpl implements ProjectFacade {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
+	public Optional<ProjectContextInfo> findContext(UUID projectId) {
+		return projectRepository.findByIdAndDeletedAtIsNull(projectId)
+				.map(project -> new ProjectContextInfo(
+						project.getId(), project.getOrganizationId(), project.getTitle(),
+						project.getPublicationType(), project.getDiscipline()));
+	}
+
+	@Override
 	@Transactional
 	public void updateCurrentStage(UUID projectId, String newStage, UUID actedBy) {
 		Project project = projectRepository.findByIdAndDeletedAtIsNull(projectId)

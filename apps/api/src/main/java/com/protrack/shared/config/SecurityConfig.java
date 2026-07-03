@@ -1,5 +1,7 @@
 package com.protrack.shared.config;
 
+import com.protrack.shared.properties.ProtrackProperties;
+import com.protrack.shared.security.InternalKeyFilter;
 import com.protrack.shared.security.JwtAuthenticationFilter;
 import com.protrack.shared.security.JwtService;
 import com.protrack.shared.security.RestAccessDeniedHandler;
@@ -33,9 +35,13 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-	/** Public paths reachable without authentication. */
+	/**
+	 * Public paths reachable without JWT authentication. {@code /internal/v1/**} is service-to-service
+	 * (the FastAPI AI callback) and is guarded instead by {@link InternalKeyFilter} (shared key).
+	 */
 	private static final String[] PUBLIC_PATHS = {
 			"/api/v1/health",
+			"/internal/v1/**",
 			"/actuator/**",
 			"/v3/api-docs/**",
 			"/swagger-ui/**",
@@ -45,13 +51,16 @@ public class SecurityConfig {
 	private final JwtService jwtService;
 	private final RestAuthenticationEntryPoint authenticationEntryPoint;
 	private final RestAccessDeniedHandler accessDeniedHandler;
+	private final ProtrackProperties properties;
 
 	public SecurityConfig(JwtService jwtService,
 			RestAuthenticationEntryPoint authenticationEntryPoint,
-			RestAccessDeniedHandler accessDeniedHandler) {
+			RestAccessDeniedHandler accessDeniedHandler,
+			ProtrackProperties properties) {
 		this.jwtService = jwtService;
 		this.authenticationEntryPoint = authenticationEntryPoint;
 		this.accessDeniedHandler = accessDeniedHandler;
+		this.properties = properties;
 	}
 
 	@Bean
@@ -82,6 +91,9 @@ public class SecurityConfig {
 						.accessDeniedHandler(accessDeniedHandler))
 				.httpBasic(AbstractHttpConfigurer::disable)
 				.formLogin(AbstractHttpConfigurer::disable)
+				// Internal-key check for /internal/v1/** (added first → runs ahead of the JWT filter).
+				.addFilterBefore(new InternalKeyFilter(properties.ai().internalKey()),
+						UsernamePasswordAuthenticationFilter.class)
 				.addFilterBefore(new JwtAuthenticationFilter(jwtService),
 						UsernamePasswordAuthenticationFilter.class);
 		return http.build();

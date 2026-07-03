@@ -56,6 +56,29 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
+# Resilience for the outbound FastAPI AI call. Retries transient failures and trips a circuit
+# breaker on sustained outages; the AiJob is then marked FAILED (never a 500 to the client).
+resilience4j:
+  retry:
+    instances:
+      aiService:
+        max-attempts: 3
+        wait-duration: 1s
+        enable-exponential-backoff: true
+        retry-exceptions:
+          - com.protrack.ai.client.AiServiceUnavailableException
+          - org.springframework.web.client.ResourceAccessException
+  circuitbreaker:
+    instances:
+      aiService:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 60
+        wait-duration-in-open-state: 30s
+        record-exceptions:
+          - com.protrack.ai.client.AiServiceUnavailableException
+          - org.springframework.web.client.ResourceAccessException
+
 # ───────────── Protrack typed configuration (see ProtrackProperties) ─────────────
 protrack:
   version: 0.1.0

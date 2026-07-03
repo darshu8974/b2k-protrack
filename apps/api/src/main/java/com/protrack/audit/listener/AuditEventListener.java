@@ -3,9 +3,11 @@ package com.protrack.audit.listener;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.protrack.audit.domain.AuditEvent;
 import com.protrack.audit.repository.AuditEventRepository;
+import com.protrack.shared.events.AiEvents;
 import com.protrack.shared.events.FileEvents;
 import com.protrack.shared.events.PackageEvents;
 import com.protrack.shared.events.ProjectEvents;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.slf4j.MDC;
@@ -22,6 +24,7 @@ public class AuditEventListener {
 	private static final String ENTITY_PROJECT = "PROJECT";
 	private static final String ENTITY_FILE = "FILE";
 	private static final String ENTITY_PACKAGE = "PACKAGE";
+	private static final String ENTITY_AI_JOB = "AI_JOB";
 	private static final String ACTOR_USER = "USER";
 
 	private final AuditEventRepository auditEventRepository;
@@ -77,6 +80,33 @@ public class AuditEventListener {
 				"Production package assembled (%d item(s))".formatted(event.itemCount()),
 				Map.of("packageId", event.packageId().toString(), "itemCount", event.itemCount(),
 						"totalSizeBytes", event.totalSizeBytes()));
+	}
+
+	@EventListener
+	public void onAiJobStarted(AiEvents.AiJobStarted event) {
+		save(event.organizationId(), event.projectId(), event.actorId(), "ANALYSIS_STARTED",
+				ENTITY_AI_JOB, event.jobId(), "AI analysis started",
+				Map.of("jobId", event.jobId().toString(), "jobType", event.jobType()));
+	}
+
+	@EventListener
+	public void onAnalysisCompleted(AiEvents.AnalysisCompleted event) {
+		Map<String, Object> metadata = new HashMap<>();
+		metadata.put("jobId", event.jobId().toString());
+		metadata.put("analysisResultId", event.analysisResultId().toString());
+		metadata.put("overallConfidence", event.overallConfidence());
+		save(event.organizationId(), event.projectId(), event.actorId(), "ANALYSIS_COMPLETED",
+				ENTITY_AI_JOB, event.jobId(), "AI analysis completed", metadata);
+	}
+
+	@EventListener
+	public void onAiJobFailed(AiEvents.AiJobFailed event) {
+		Map<String, Object> metadata = new HashMap<>();
+		metadata.put("jobId", event.jobId().toString());
+		metadata.put("jobType", event.jobType());
+		metadata.put("error", event.errorMessage());
+		save(event.organizationId(), event.projectId(), event.actorId(), "ANALYSIS_FAILED",
+				ENTITY_AI_JOB, event.jobId(), "AI job failed", metadata);
 	}
 
 	private void record(UUID organizationId, UUID projectId, UUID actorId, String eventType,
