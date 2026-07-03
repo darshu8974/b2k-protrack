@@ -9,7 +9,10 @@ from __future__ import annotations
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from app.core.logging import get_logger
 from app.schemas.internal import ErrorPayload
+
+logger = get_logger(__name__)
 
 
 class AiServiceError(Exception):
@@ -62,4 +65,13 @@ def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(AiServiceError)
     async def _handle_ai_error(_: Request, exc: AiServiceError) -> JSONResponse:
         payload = ErrorPayload(code=exc.code, message=exc.message, retryable=exc.retryable)
-        return JSONResponse(status_code=exc.status_code, content=payload.model_dump())
+        return JSONResponse(status_code=exc.status_code, content=payload.model_dump(by_alias=True))
+
+    @app.exception_handler(Exception)
+    async def _handle_unexpected(_: Request, exc: Exception) -> JSONResponse:
+        # Never surface a bare 500 to the user-facing flow (AI Service Architecture §8).
+        logger.error("unhandled_error", error_type=type(exc).__name__, error=str(exc))
+        payload = ErrorPayload(
+            code="INTERNAL", message="An unexpected error occurred.", retryable=False
+        )
+        return JSONResponse(status_code=500, content=payload.model_dump(by_alias=True))

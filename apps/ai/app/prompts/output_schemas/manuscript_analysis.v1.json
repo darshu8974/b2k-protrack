@@ -1,0 +1,84 @@
+{
+  "type": "object",
+  "description": "Structured manuscript-analysis judgement produced by the LLM. Deterministic counts (metrics, heading counts) come from the parser and are NOT part of this schema.",
+  "properties": {
+    "overallConfidence": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Overall confidence in this analysis (0-100)."
+    },
+    "summary": {
+      "type": "string",
+      "description": "A concise, human-readable summary of the manuscript's production readiness."
+    },
+    "language": {
+      "type": ["string", "null"],
+      "description": "Detected primary language (ISO code or name), or null if unknown."
+    },
+    "complexityScore": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Production-complexity score (0-100; higher = more complex)."
+    },
+    "complexityLabel": {
+      "type": "string",
+      "description": "Human label for the complexity band (e.g. Low, Moderate, High)."
+    },
+    "estimatedWorkingDays": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Estimated production effort in working days."
+    },
+    "composition": {
+      "type": "array",
+      "description": "Document composition breakdown for the donut chart; percentages should total ~100.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "segment": { "type": "string" },
+          "percentage": { "type": "number", "minimum": 0, "maximum": 100 }
+        },
+        "required": ["segment", "percentage"]
+      }
+    },
+    "risks": {
+      "type": "array",
+      "description": "Flagged production risks with severity.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "severity": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW"] },
+          "title": { "type": "string" },
+          "description": { "type": "string" }
+        },
+        "required": ["severity", "title", "description"]
+      }
+    },
+    "suggestedTeam": {
+      "type": "array",
+      "description": "AI-matched team roles with a match score and rationale.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": { "type": "string" },
+          "matchScore": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "rationale": { "type": "string" },
+          "candidateHint": { "type": ["string", "null"] }
+        },
+        "required": ["role", "matchScore", "rationale"]
+      }
+    }
+  },
+  "required": [
+    "overallConfidence",
+    "summary",
+    "complexityScore",
+    "complexityLabel",
+    "estimatedWorkingDays",
+    "composition",
+    "risks",
+    "suggestedTeam"
+  ]
+}

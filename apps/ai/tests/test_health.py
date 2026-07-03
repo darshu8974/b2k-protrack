@@ -17,15 +17,18 @@ def test_health_returns_up() -> None:
     assert body["service"] == "protrack-ai"
 
 
-def test_ready_returns_provider() -> None:
+def test_ready_reports_active_provider() -> None:
     response = client.get("/internal/v1/ready")
     assert response.status_code == 200
-    assert response.json()["provider"] == "claude"
+    body = response.json()
+    # Default provider is the deterministic mock (no API key required).
+    assert body["provider"] == "mock"
+    assert body["model"] == "mock"
 
 
 def test_business_route_requires_internal_key() -> None:
-    # Without X-Internal-Key the analyze route is rejected by the auth guard.
-    response = client.post("/internal/v1/analyze/manuscript", json={
-        "job_id": "j1", "file_url": "http://x", "doc_type": "docx",
-    })
+    response = client.post(
+        "/internal/v1/analyze/manuscript",
+        json={"jobId": "j1", "fileUrl": "file:///x", "docType": "docx"},
+    )
     assert response.status_code == 401

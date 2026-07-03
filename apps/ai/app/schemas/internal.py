@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
-from app.schemas.common import JobStatus
+from app.schemas.common import CamelModel, JobStatus
 
 
-class ProjectContext(BaseModel):
+class ProjectContext(CamelModel):
     """Minimal project context passed by Spring Boot for scoping AI work."""
 
     project_id: str
@@ -16,7 +16,7 @@ class ProjectContext(BaseModel):
     discipline: str | None = None
 
 
-class LLMUsage(BaseModel):
+class LLMUsage(CamelModel):
     """Normalized token-usage accounting returned by a provider."""
 
     input_tokens: int = 0
@@ -24,7 +24,7 @@ class LLMUsage(BaseModel):
     model: str | None = None
 
 
-class ProgressCallback(BaseModel):
+class ProgressCallback(CamelModel):
     """Posted by the AI service to Spring Boot during a long job."""
 
     job_id: str
@@ -33,7 +33,7 @@ class ProgressCallback(BaseModel):
     partial: dict | None = None
 
 
-class ErrorPayload(BaseModel):
+class ErrorPayload(CamelModel):
     """Structured error body returned on failure."""
 
     code: str

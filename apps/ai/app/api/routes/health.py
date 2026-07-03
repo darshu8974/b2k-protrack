@@ -20,5 +20,5 @@ async def ready(settings: Settings = Depends(get_settings)) -> dict:
     return {
         "status": "READY",
         "provider": settings.llm_provider,
-        "model": settings.claude_model,
+        "model": settings.active_model,
     }

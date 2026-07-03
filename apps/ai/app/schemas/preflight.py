@@ -1,4 +1,7 @@
-"""PDF-preflight request/response contract (maps to preflight_runs / preflight_checks / qa_issues)."""
+"""PDF-preflight request/response contract (maps to preflight_runs / preflight_checks / qa_issues).
+
+Preflight is implemented in Sprint 5; these are the contract skeletons.
+"""
 
 from __future__ import annotations
 

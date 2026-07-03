@@ -6,8 +6,13 @@ from fastapi import Depends
 
 from app.core.config import Settings, get_settings
 from app.core.security import verify_internal_key
+from app.orchestration.analysis_orchestrator import AnalysisOrchestrator
+from app.orchestration.progress import ProgressReporter
+from app.prompts.registry import PromptRegistry
 from app.providers.base import LLMProvider
 from app.providers.router import get_provider
+from app.services.normalizer import AnalysisNormalizer
+from app.storage.file_loader import FileLoader
 
 
 def settings_dep() -> Settings:
@@ -16,6 +21,20 @@ def settings_dep() -> Settings:
 
 def provider_dep() -> LLMProvider:
     return get_provider()
+
+
+def analysis_orchestrator_dep(
+    settings: Settings = Depends(get_settings),
+    provider: LLMProvider = Depends(provider_dep),
+) -> AnalysisOrchestrator:
+    """Assemble the manuscript-analysis orchestrator from settings and the active provider."""
+    return AnalysisOrchestrator(
+        provider=provider,
+        file_loader=FileLoader(settings.internal_key, settings.request_timeout_ms),
+        prompt_registry=PromptRegistry(),
+        normalizer=AnalysisNormalizer(),
+        reporter=ProgressReporter(settings.spring_callback_base_url, settings.internal_key),
+    )
 
 
 # Reusable guard for all internal business endpoints.

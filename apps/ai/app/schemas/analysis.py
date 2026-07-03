@@ -2,49 +2,47 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel
-
-from app.schemas.common import Confidence, Severity
+from app.schemas.common import CamelModel, Confidence, Severity
 from app.schemas.internal import LLMUsage, ProjectContext
 
 
-class ManuscriptAnalysisRequest(BaseModel):
+class ManuscriptAnalysisRequest(CamelModel):
     job_id: str
     file_url: str
     doc_type: str
     project_context: ProjectContext | None = None
 
 
-class Metric(BaseModel):
+class Metric(CamelModel):
     key: str
     value: int
     confidence: Confidence
 
 
-class CompositionSegment(BaseModel):
+class CompositionSegment(CamelModel):
     segment: str
     percentage: float
 
 
-class HeadingCount(BaseModel):
+class HeadingCount(CamelModel):
     level: str
     count: int
 
 
-class RiskFlag(BaseModel):
+class RiskFlag(CamelModel):
     severity: Severity
     title: str
     description: str
 
 
-class TeamSuggestion(BaseModel):
+class TeamSuggestion(CamelModel):
     role: str
     match_score: Confidence
     rationale: str
     candidate_hint: str | None = None
 
 
-class AnalysisResult(BaseModel):
+class AnalysisResult(CamelModel):
     overall_confidence: Confidence
     summary: str
     language: str | None = None
