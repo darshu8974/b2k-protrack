@@ -4,9 +4,13 @@ An enterprise platform that orchestrates the STEM publishing workflow **around**
 intake, AI manuscript analysis, production hand-off, PDF preflight, QA sign-off, and audit — while
 page layout stays human and offline in InDesign. AI proposes; people decide.
 
-> **Status:** Phase 1 MVP · Implementation phase · Sprint 3 complete (document upload, immutable
-> versioning, and the production-package hand-off) on top of Sprint 2 (project management, workflow,
-> dashboard, audit) and Sprint 1 (auth + RBAC). Next: Sprint 4 (AI manuscript analysis).
+> **Status:** Phase 1 MVP · Implementation phase · Sprint 4 complete (AI manuscript analysis —
+> FastAPI AI service behind a provider abstraction, async job orchestration with SSE progress, and
+> the analysis workspace) on top of Sprint 3 (files/versioning/package), Sprint 2 (projects,
+> workflow, dashboard, audit), and Sprint 1 (auth + RBAC). Next: Sprint 5 (PDF preflight & QA).
+>
+> The AI service defaults to a deterministic **mock** provider, so the whole pipeline runs with no
+> API key. Set `AI_PROVIDER=claude` + `ANTHROPIC_API_KEY` to use the real Claude API.
 
 ## Monorepo layout
 
@@ -59,7 +63,15 @@ Delivery is sequenced by the [Implementation Roadmap](docs/IMPLEMENTATION_ROADMA
 ```bash
 cd apps/api
 set -a && source .env && set +a   # load DB env vars (Git Bash)
-./gradlew bootRun                 # Flyway applies V1–V6 on startup
+./gradlew bootRun                 # Flyway applies V1–V7 on startup
+```
+
+**AI service** (FastAPI, port 8000 — optional; needed for AI analysis):
+
+```bash
+cd apps/ai
+python -m venv .venv && ./.venv/Scripts/python -m pip install -e ".[dev]"   # first run
+./.venv/Scripts/python -m uvicorn app.main:app --port 8000                  # AI_PROVIDER=mock by default
 ```
 
 **Web** (React + Vite, port 5173 — the CORS-allowed origin):
@@ -74,7 +86,8 @@ npm run dev
 `marcus.reed@protrack.io` (Designer), `lena.ortiz@protrack.io` (QA), `david.cho@protrack.io` (Admin).
 
 **Tests:** `cd apps/api && ./gradlew test` (the Testcontainers context test needs Docker and is
-skipped without it); `cd apps/web && npm run build` (type-check); `cd apps/ai && pytest`.
+skipped without it); `cd apps/web && npm run build` (type-check); `cd apps/ai && ./.venv/Scripts/python
+-m pytest` (AI service unit tests — parsers, providers, normalizer, analyze pipeline).
 
 ## Contributing
 
