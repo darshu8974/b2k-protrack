@@ -26,6 +26,7 @@ import {
 } from "../../../lib/labels";
 import { useAuth } from "../../auth/useAuth";
 import { useProjectActivity } from "../../audit/hooks";
+import { AnalysisPanel } from "../../analysis/AnalysisPanel";
 import { DocumentsPanel } from "../../manuscripts/components/DocumentsPanel";
 import { PackagePanel } from "../../package/components/PackagePanel";
 import { useWorkflowStages } from "../../reference/hooks";
@@ -89,6 +90,7 @@ export function ProjectDetailsPage() {
         <Tabs value={activeTab} onChange={(_, value) => setTab(value)}>
           <Tab label="Overview" value="overview" />
           <Tab label="Files" value="files" />
+          <Tab label="AI Analysis" value="analysis" />
           {canSeePackage && <Tab label="Package" value="package" />}
         </Tabs>
       </Box>
@@ -217,6 +219,10 @@ export function ProjectDetailsPage() {
       )}
 
       {activeTab === "files" && <DocumentsPanel projectId={project.id} />}
+
+      {activeTab === "analysis" && (
+        <AnalysisPanel projectId={project.id} currentStage={project.currentStage} />
+      )}
 
       {activeTab === "package" && canSeePackage && <PackagePanel projectId={project.id} />}
     </Stack>

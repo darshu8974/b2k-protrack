@@ -80,7 +80,35 @@ export const AUDIT_EVENT_LABEL: Record<string, string> = {
   STAGE_CHANGED: "Stage changed",
   FILE_UPLOADED: "File uploaded",
   PACKAGE_ASSEMBLED: "Package assembled",
+  ANALYSIS_STARTED: "AI analysis started",
+  ANALYSIS_COMPLETED: "AI analysis completed",
+  ANALYSIS_FAILED: "AI job failed",
 };
+
+export const SEVERITY_LABEL: Record<string, string> = {
+  HIGH: "High",
+  MEDIUM: "Medium",
+  LOW: "Low",
+};
+
+export const SEVERITY_COLOR: Record<string, ChipColor> = {
+  HIGH: "error",
+  MEDIUM: "warning",
+  LOW: "default",
+};
+
+export const METRIC_LABEL: Record<string, string> = {
+  pages: "Pages",
+  figures: "Figures",
+  tables: "Tables",
+  equations: "Equations",
+  problems: "Problems",
+  references: "References",
+};
+
+export function metricLabel(key: string): string {
+  return METRIC_LABEL[key] ?? key;
+}
 
 export function auditEventLabel(eventType: string): string {
   return AUDIT_EVENT_LABEL[eventType] ?? eventType;

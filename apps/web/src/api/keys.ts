@@ -14,4 +14,6 @@ export const queryKeys = {
     ["project", id, "documents", docType ?? "all"] as const,
   documentVersions: (documentId: string) => ["document", documentId, "versions"] as const,
   projectPackage: (id: string) => ["project", id, "package"] as const,
+  analysis: (projectId: string) => ["project", projectId, "analysis"] as const,
+  aiJob: (jobId: string) => ["ai-job", jobId] as const,
 };
