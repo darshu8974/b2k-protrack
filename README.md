@@ -4,10 +4,11 @@ An enterprise platform that orchestrates the STEM publishing workflow **around**
 intake, AI manuscript analysis, production hand-off, PDF preflight, QA sign-off, and audit — while
 page layout stays human and offline in InDesign. AI proposes; people decide.
 
-> **Status:** Phase 1 MVP · Implementation phase · Sprint 4 complete (AI manuscript analysis —
-> FastAPI AI service behind a provider abstraction, async job orchestration with SSE progress, and
-> the analysis workspace) on top of Sprint 3 (files/versioning/package), Sprint 2 (projects,
-> workflow, dashboard, audit), and Sprint 1 (auth + RBAC). Next: Sprint 5 (PDF preflight & QA).
+> **Status:** Phase 1 MVP · Implementation phase · Sprint 5 complete (PDF preflight & QA sign-off —
+> production-PDF upload, AI preflight with six deterministic checks, QA issue triage, and the atomic
+> e-sign → Completed gate) on top of Sprint 4 (AI manuscript analysis), Sprint 3 (files/versioning/
+> package), Sprint 2 (projects, workflow, dashboard, audit), and Sprint 1 (auth + RBAC). Next:
+> Sprint 6 (notifications, comments, assistant, reports, admin).
 >
 > The AI service defaults to a deterministic **mock** provider, so the whole pipeline runs with no
 > API key. Set `AI_PROVIDER=claude` + `ANTHROPIC_API_KEY` to use the real Claude API.
@@ -63,10 +64,10 @@ Delivery is sequenced by the [Implementation Roadmap](docs/IMPLEMENTATION_ROADMA
 ```bash
 cd apps/api
 set -a && source .env && set +a   # load DB env vars (Git Bash)
-./gradlew bootRun                 # Flyway applies V1–V7 on startup
+./gradlew bootRun                 # Flyway applies V1–V8 on startup
 ```
 
-**AI service** (FastAPI, port 8000 — optional; needed for AI analysis):
+**AI service** (FastAPI, port 8000 — optional; needed for AI analysis and PDF preflight):
 
 ```bash
 cd apps/ai
@@ -87,7 +88,8 @@ npm run dev
 
 **Tests:** `cd apps/api && ./gradlew test` (the Testcontainers context test needs Docker and is
 skipped without it); `cd apps/web && npm run build` (type-check); `cd apps/ai && ./.venv/Scripts/python
--m pytest` (AI service unit tests — parsers, providers, normalizer, analyze pipeline).
+-m pytest` (AI service unit tests — parsers, PDF facts, providers, normalizer, analyze + preflight
+pipelines). The AI service also runs `ruff check .` and `mypy app` clean.
 
 ## Contributing
 
