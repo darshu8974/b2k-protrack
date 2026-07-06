@@ -54,16 +54,21 @@ public class DocumentService {
 	/** Create a new document and upload its first version. */
 	public DocumentResponse create(UUID actor, UUID projectId, DocType docType, String title,
 			MultipartFile file) {
+		FileVersion version = createVersion(actor, projectId, docType, title, file);
+		Document document = documentRepository.findById(version.getDocumentId()).orElseThrow();
+		return mapper.toResponse(document, version, uploaderName(version));
+	}
+
+	/** Create a new document with its first version, returning the version (for facade callers). */
+	public FileVersion createVersion(UUID actor, UUID projectId, DocType docType, String title,
+			MultipartFile file) {
 		UUID organizationId = requireProjectInOrg(actor, projectId).organizationId();
 		String resolvedTitle = StringUtils.hasText(title) ? title.trim() : originalName(file);
 
 		// Blob first (idempotent by checksum), then a short tx records the version metadata.
 		UploadedBlob blob = uploadService.store(file, docType);
-		FileVersion version = uploadService.createDocumentWithVersion(
+		return uploadService.createDocumentWithVersion(
 				projectId, organizationId, docType, resolvedTitle, blob, actor);
-
-		Document document = documentRepository.findById(version.getDocumentId()).orElseThrow();
-		return mapper.toResponse(document, version, uploaderName(version));
 	}
 
 	/** Convenience: upload a manuscript (DOCX/PDF) as a new document. */

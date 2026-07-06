@@ -7,6 +7,7 @@ import com.protrack.shared.events.AiEvents;
 import com.protrack.shared.events.FileEvents;
 import com.protrack.shared.events.PackageEvents;
 import com.protrack.shared.events.ProjectEvents;
+import com.protrack.shared.events.QaEvents;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -25,6 +26,10 @@ public class AuditEventListener {
 	private static final String ENTITY_FILE = "FILE";
 	private static final String ENTITY_PACKAGE = "PACKAGE";
 	private static final String ENTITY_AI_JOB = "AI_JOB";
+	private static final String ENTITY_PREFLIGHT_RUN = "PREFLIGHT_RUN";
+	private static final String ENTITY_QA_ISSUE = "QA_ISSUE";
+	private static final String ENTITY_QA_SIGNOFF = "QA_SIGNOFF";
+	private static final String PREFLIGHT_JOB_TYPE = "PDF_PREFLIGHT";
 	private static final String ACTOR_USER = "USER";
 
 	private final AuditEventRepository auditEventRepository;
@@ -84,8 +89,10 @@ public class AuditEventListener {
 
 	@EventListener
 	public void onAiJobStarted(AiEvents.AiJobStarted event) {
-		save(event.organizationId(), event.projectId(), event.actorId(), "ANALYSIS_STARTED",
-				ENTITY_AI_JOB, event.jobId(), "AI analysis started",
+		boolean preflight = PREFLIGHT_JOB_TYPE.equals(event.jobType());
+		save(event.organizationId(), event.projectId(), event.actorId(),
+				preflight ? "PREFLIGHT_STARTED" : "ANALYSIS_STARTED",
+				ENTITY_AI_JOB, event.jobId(), preflight ? "PDF preflight started" : "AI analysis started",
 				Map.of("jobId", event.jobId().toString(), "jobType", event.jobType()));
 	}
 
@@ -100,13 +107,48 @@ public class AuditEventListener {
 	}
 
 	@EventListener
+	public void onPreflightCompleted(AiEvents.PreflightCompleted event) {
+		Map<String, Object> metadata = new HashMap<>();
+		metadata.put("jobId", event.jobId().toString());
+		metadata.put("preflightRunId", event.preflightRunId().toString());
+		metadata.put("overallScore", event.overallScore());
+		metadata.put("passed", event.passed());
+		metadata.put("totalIssues", event.totalIssues());
+		metadata.put("highSeverity", event.highSeverity());
+		save(event.organizationId(), event.projectId(), event.actorId(), "PREFLIGHT_COMPLETED",
+				ENTITY_PREFLIGHT_RUN, event.preflightRunId(), "PDF preflight completed", metadata);
+	}
+
+	@EventListener
 	public void onAiJobFailed(AiEvents.AiJobFailed event) {
+		boolean preflight = PREFLIGHT_JOB_TYPE.equals(event.jobType());
 		Map<String, Object> metadata = new HashMap<>();
 		metadata.put("jobId", event.jobId().toString());
 		metadata.put("jobType", event.jobType());
 		metadata.put("error", event.errorMessage());
-		save(event.organizationId(), event.projectId(), event.actorId(), "ANALYSIS_FAILED",
-				ENTITY_AI_JOB, event.jobId(), "AI job failed", metadata);
+		save(event.organizationId(), event.projectId(), event.actorId(),
+				preflight ? "PREFLIGHT_FAILED" : "ANALYSIS_FAILED",
+				ENTITY_AI_JOB, event.jobId(), preflight ? "PDF preflight failed" : "AI job failed",
+				metadata);
+	}
+
+	@EventListener
+	public void onIssueDecided(QaEvents.IssueDecided event) {
+		save(event.organizationId(), event.projectId(), event.actorId(), "ISSUE_DECIDED",
+				ENTITY_QA_ISSUE, event.issueId(), "QA issue decided (%s)".formatted(event.decision()),
+				Map.of("issueId", event.issueId().toString(), "decision", event.decision()));
+	}
+
+	@EventListener
+	public void onQaSignedOff(QaEvents.QaSignedOff event) {
+		Map<String, Object> metadata = new HashMap<>();
+		metadata.put("signoffId", event.signoffId().toString());
+		metadata.put("decision", event.decision());
+		metadata.put("qualityScore", event.qualityScore());
+		metadata.put("targetStage", event.targetStage());
+		save(event.organizationId(), event.projectId(), event.actorId(), "QA_SIGNED_OFF",
+				ENTITY_QA_SIGNOFF, event.signoffId(),
+				"QA sign-off: %s".formatted(event.decision()), metadata);
 	}
 
 	private void record(UUID organizationId, UUID projectId, UUID actorId, String eventType,

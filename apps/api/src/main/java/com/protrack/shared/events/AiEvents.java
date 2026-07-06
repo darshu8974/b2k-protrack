@@ -22,6 +22,12 @@ public final class AiEvents {
 			UUID analysisResultId, Integer overallConfidence) {
 	}
 
+	/** A PDF preflight completed and its run/checks/issues were persisted. */
+	public record PreflightCompleted(UUID organizationId, UUID projectId, UUID actorId, UUID jobId,
+			UUID preflightRunId, Integer overallScore, Boolean passed, Integer totalIssues,
+			Integer highSeverity) {
+	}
+
 	/** An AI job failed after processing/retries. */
 	public record AiJobFailed(UUID organizationId, UUID projectId, UUID actorId, UUID jobId,
 			String jobType, String errorMessage) {

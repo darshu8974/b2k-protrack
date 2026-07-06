@@ -5,10 +5,12 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Published interface of the files module. Lets other modules (packaging, and later the AI module)
- * resolve a document/version to its stored blob without depending on the files entities directly.
+ * Published interface of the files module. Lets other modules (packaging, and the ai/preflight
+ * modules) resolve a document/version to its stored blob, and upload a production PDF, without
+ * depending on the files entities directly.
  */
 public interface FilesFacade {
 
@@ -16,6 +18,12 @@ public interface FilesFacade {
 	record FileRef(UUID documentId, UUID versionId, String docType, String title, String fileName,
 			String mimeType, long sizeBytes, String storageKey) {
 	}
+
+	/**
+	 * Store an uploaded production PDF as a new {@code PRODUCTION_PDF} document + version and return
+	 * the reference. Validation (PDF-only, size) is enforced by the files module.
+	 */
+	FileRef uploadProductionPdf(UUID actorId, UUID projectId, MultipartFile file, String title);
 
 	/** Resolve a document's current version, if any. */
 	Optional<FileRef> resolveCurrentVersion(UUID documentId);

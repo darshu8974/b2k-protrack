@@ -3,6 +3,8 @@ package com.protrack.ai.client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.protrack.ai.client.dto.AnalysisRequest;
 import com.protrack.ai.client.dto.AnalysisResponse;
+import com.protrack.ai.client.dto.PreflightRequest;
+import com.protrack.ai.client.dto.PreflightResponse;
 import com.protrack.shared.properties.ProtrackProperties;
 import com.protrack.shared.web.CorrelationIdFilter;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -48,11 +50,34 @@ public class FastApiClient implements AiServiceClient {
 	@Retry(name = "aiService")
 	@CircuitBreaker(name = "aiService")
 	public AiAnalysisResult analyzeManuscript(AnalysisRequest request) {
-		String traceId = MDC.get(CorrelationIdFilter.MDC_KEY);
-		String body;
+		String body = post("/internal/v1/analyze/manuscript", request);
 		try {
-			body = restClient.post()
-					.uri("/internal/v1/analyze/manuscript")
+			AnalysisResponse parsed = objectMapper.readValue(body, AnalysisResponse.class);
+			return new AiAnalysisResult(parsed, body);
+		} catch (Exception ex) {
+			throw new AiServiceException("Could not parse AI service response", ex);
+		}
+	}
+
+	@Override
+	@Retry(name = "aiService")
+	@CircuitBreaker(name = "aiService")
+	public AiPreflightResult preflightPdf(PreflightRequest request) {
+		String body = post("/internal/v1/preflight/pdf", request);
+		try {
+			PreflightResponse parsed = objectMapper.readValue(body, PreflightResponse.class);
+			return new AiPreflightResult(parsed, body);
+		} catch (Exception ex) {
+			throw new AiServiceException("Could not parse AI service response", ex);
+		}
+	}
+
+	/** POST a JSON body to the AI service with the internal key + trace id; return the raw body. */
+	private String post(String uri, Object requestBody) {
+		String traceId = MDC.get(CorrelationIdFilter.MDC_KEY);
+		try {
+			return restClient.post()
+					.uri(uri)
 					.header(INTERNAL_KEY_HEADER, internalKey)
 					.headers(headers -> {
 						if (traceId != null) {
@@ -60,7 +85,7 @@ public class FastApiClient implements AiServiceClient {
 						}
 					})
 					.contentType(MediaType.APPLICATION_JSON)
-					.body(request)
+					.body(requestBody)
 					.retrieve()
 					.onStatus(HttpStatusCode::is5xxServerError, (req, res) -> {
 						throw new AiServiceUnavailableException(
@@ -73,12 +98,6 @@ public class FastApiClient implements AiServiceClient {
 					.body(String.class);
 		} catch (ResourceAccessException ex) {
 			throw new AiServiceUnavailableException("AI service unreachable: " + ex.getMessage(), ex);
-		}
-		try {
-			AnalysisResponse parsed = objectMapper.readValue(body, AnalysisResponse.class);
-			return new AiAnalysisResult(parsed, body);
-		} catch (Exception ex) {
-			throw new AiServiceException("Could not parse AI service response", ex);
 		}
 	}
 }

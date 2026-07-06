@@ -1,9 +1,11 @@
 package com.protrack.files.spi;
 
+import com.protrack.files.domain.DocType;
 import com.protrack.files.domain.Document;
 import com.protrack.files.domain.FileVersion;
 import com.protrack.files.repository.DocumentRepository;
 import com.protrack.files.repository.FileVersionRepository;
+import com.protrack.files.service.DocumentService;
 import com.protrack.shared.storage.StoragePort;
 import java.net.URI;
 import java.time.Duration;
@@ -15,6 +17,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 /** Default {@link FilesFacade} backed by the files repositories and the storage port. */
 @Service
@@ -23,12 +26,24 @@ public class FilesFacadeImpl implements FilesFacade {
 	private final DocumentRepository documentRepository;
 	private final FileVersionRepository fileVersionRepository;
 	private final StoragePort storagePort;
+	private final DocumentService documentService;
 
 	public FilesFacadeImpl(DocumentRepository documentRepository,
-			FileVersionRepository fileVersionRepository, StoragePort storagePort) {
+			FileVersionRepository fileVersionRepository, StoragePort storagePort,
+			DocumentService documentService) {
 		this.documentRepository = documentRepository;
 		this.fileVersionRepository = fileVersionRepository;
 		this.storagePort = storagePort;
+		this.documentService = documentService;
+	}
+
+	@Override
+	public FileRef uploadProductionPdf(UUID actorId, UUID projectId, MultipartFile file,
+			String title) {
+		FileVersion version =
+				documentService.createVersion(actorId, projectId, DocType.PRODUCTION_PDF, title, file);
+		Document document = documentRepository.findById(version.getDocumentId()).orElseThrow();
+		return toRef(document, version);
 	}
 
 	@Override
