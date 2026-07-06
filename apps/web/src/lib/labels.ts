@@ -83,6 +83,60 @@ export const AUDIT_EVENT_LABEL: Record<string, string> = {
   ANALYSIS_STARTED: "AI analysis started",
   ANALYSIS_COMPLETED: "AI analysis completed",
   ANALYSIS_FAILED: "AI job failed",
+  PREFLIGHT_STARTED: "Preflight started",
+  PREFLIGHT_COMPLETED: "Preflight completed",
+  PREFLIGHT_FAILED: "Preflight failed",
+  ISSUE_DECIDED: "QA issue decided",
+  QA_SIGNED_OFF: "QA sign-off",
+};
+
+export const CHECK_KEY_LABEL: Record<string, string> = {
+  geometry: "Page geometry",
+  font_embedding: "Font embedding",
+  image_resolution: "Image resolution",
+  overflow: "Content overflow",
+  placement: "Safe-area placement",
+  accessibility: "Accessibility",
+};
+
+export function checkKeyLabel(key: string): string {
+  return CHECK_KEY_LABEL[key] ?? key;
+}
+
+/** Fixed order of the Phase-1 preflight checks (matches the backend registry). */
+export const CHECK_KEYS = [
+  "geometry",
+  "font_embedding",
+  "image_resolution",
+  "overflow",
+  "placement",
+  "accessibility",
+] as const;
+
+export const CHECK_RESULT_COLOR: Record<string, ChipColor> = {
+  PASS: "success",
+  REVIEW: "warning",
+  FAIL: "error",
+};
+
+export const ISSUE_STATUS_LABEL: Record<string, string> = {
+  OPEN: "Open",
+  TRIAGED: "Triaged",
+  RESOLVED: "Resolved",
+  WAIVED: "Waived",
+};
+
+export const ISSUE_STATUS_COLOR: Record<string, ChipColor> = {
+  OPEN: "warning",
+  TRIAGED: "info",
+  RESOLVED: "success",
+  WAIVED: "default",
+};
+
+export const DECISION_LABEL: Record<string, string> = {
+  ACCEPT_FIX: "Accept fix",
+  SEND_BACK: "Send back",
+  COMMENT: "Comment",
 };
 
 export const SEVERITY_LABEL: Record<string, string> = {

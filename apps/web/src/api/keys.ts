@@ -16,4 +16,8 @@ export const queryKeys = {
   projectPackage: (id: string) => ["project", id, "package"] as const,
   analysis: (projectId: string) => ["project", projectId, "analysis"] as const,
   aiJob: (jobId: string) => ["ai-job", jobId] as const,
+  preflight: (projectId: string) => ["project", projectId, "preflight"] as const,
+  issues: (projectId: string) => ["project", projectId, "issues"] as const,
+  approvals: (projectId: string) => ["project", projectId, "approvals"] as const,
+  signoffs: (projectId: string) => ["project", projectId, "signoffs"] as const,
 };

@@ -29,6 +29,7 @@ import { useProjectActivity } from "../../audit/hooks";
 import { AnalysisPanel } from "../../analysis/AnalysisPanel";
 import { DocumentsPanel } from "../../manuscripts/components/DocumentsPanel";
 import { PackagePanel } from "../../package/components/PackagePanel";
+import { PreflightQaPanel } from "../../preflight/PreflightQaPanel";
 import { useWorkflowStages } from "../../reference/hooks";
 import { useProject, useProjectTimeline } from "../hooks";
 
@@ -91,6 +92,7 @@ export function ProjectDetailsPage() {
           <Tab label="Overview" value="overview" />
           <Tab label="Files" value="files" />
           <Tab label="AI Analysis" value="analysis" />
+          <Tab label="Preflight & QA" value="preflight" />
           {canSeePackage && <Tab label="Package" value="package" />}
         </Tabs>
       </Box>
@@ -222,6 +224,10 @@ export function ProjectDetailsPage() {
 
       {activeTab === "analysis" && (
         <AnalysisPanel projectId={project.id} currentStage={project.currentStage} />
+      )}
+
+      {activeTab === "preflight" && (
+        <PreflightQaPanel projectId={project.id} currentStage={project.currentStage} />
       )}
 
       {activeTab === "package" && canSeePackage && <PackagePanel projectId={project.id} />}
