@@ -1,29 +1,30 @@
-"""PDF-preflight request/response contract (maps to preflight_runs / preflight_checks / qa_issues).
+"""PDF-preflight request/response contract (maps 1:1 to the preflight_runs / preflight_checks /
+qa_issues DB tables).
 
-Preflight is implemented in Sprint 5; these are the contract skeletons.
+Wire form is camelCase (``CamelModel``), matching the API specification and Spring's Jackson
+mapping — the same convention as the analysis contract. Deterministic checks own ``result`` and the
+overall score; the LLM only phrases each issue's severity, title and recommendation.
 """
 
 from __future__ import annotations
 
-from pydantic import BaseModel
-
-from app.schemas.common import CheckResult, Confidence, Severity
+from app.schemas.common import CamelModel, CheckResult, Confidence, Severity
 from app.schemas.internal import LLMUsage
 
 
-class PdfPreflightRequest(BaseModel):
+class PdfPreflightRequest(CamelModel):
     job_id: str
     file_url: str
     standard: str | None = None
 
 
-class PreflightCheck(BaseModel):
+class PreflightCheck(CamelModel):
     key: str
     result: CheckResult
     detail: str | None = None
 
 
-class PreflightIssue(BaseModel):
+class PreflightIssue(CamelModel):
     category: str
     severity: Severity
     title: str
@@ -32,12 +33,12 @@ class PreflightIssue(BaseModel):
     source: str = "AI"
 
 
-class PreflightTotals(BaseModel):
+class PreflightTotals(CamelModel):
     issues: int = 0
     high: int = 0
 
 
-class PreflightResult(BaseModel):
+class PreflightResult(CamelModel):
     overall_score: Confidence
     passed: bool
     standard: str | None = None

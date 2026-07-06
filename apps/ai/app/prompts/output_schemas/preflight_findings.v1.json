@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "description": "LLM phrasing of deterministic preflight findings. The set of findings and which checks failed are decided deterministically; you only phrase severity, a title, and a recommendation for each supplied finding. Do not add, remove, or re-classify findings.",
+  "properties": {
+    "issues": {
+      "type": "array",
+      "description": "One entry per supplied finding, in any order, each echoing its checkKey.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "checkKey": {
+            "type": "string",
+            "description": "The finding's check key, echoed back exactly (e.g. font_embedding)."
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["HIGH", "MEDIUM", "LOW"],
+            "description": "Severity, consistent with the deterministic result (FAIL=HIGH/MEDIUM, REVIEW=MEDIUM/LOW)."
+          },
+          "title": {
+            "type": "string",
+            "description": "A short, human-readable issue title (a few words)."
+          },
+          "recommendation": {
+            "type": "string",
+            "description": "A concrete, actionable fix recommendation for the QA reviewer / designer."
+          }
+        },
+        "required": ["checkKey", "severity", "title", "recommendation"]
+      }
+    }
+  },
+  "required": ["issues"]
+}

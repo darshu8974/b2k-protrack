@@ -19,6 +19,7 @@ TEMPLATES_DIR = Path(__file__).parent / "templates"
 OUTPUT_SCHEMAS_DIR = Path(__file__).parent / "output_schemas"
 
 MANUSCRIPT_ANALYSIS_V1 = "manuscript_analysis.v1"
+PREFLIGHT_FINDINGS_V1 = "preflight_findings.v1"
 
 
 class PromptRegistry:

@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 from docx import Document
+from pypdf import PdfWriter
 
 
 def _build_docx() -> bytes:
@@ -35,3 +36,25 @@ def sample_docx_url(tmp_path: Path) -> str:
     path = tmp_path / "manuscript.docx"
     path.write_bytes(_build_docx())
     return path.as_uri()  # file:///... URL, mirroring the local storage driver's signed URL
+
+
+def _build_pdf() -> bytes:
+    # A minimal, valid single-page PDF (US Letter). No fonts/images/tags — enough to exercise the
+    # preflight pipeline end-to-end deterministically.
+    writer = PdfWriter()
+    writer.add_blank_page(width=612, height=792)
+    buffer = BytesIO()
+    writer.write(buffer)
+    return buffer.getvalue()
+
+
+@pytest.fixture
+def sample_pdf_bytes() -> bytes:
+    return _build_pdf()
+
+
+@pytest.fixture
+def sample_pdf_url(tmp_path: Path) -> str:
+    path = tmp_path / "production.pdf"
+    path.write_bytes(_build_pdf())
+    return path.as_uri()

@@ -38,6 +38,18 @@ async def test_mock_provider_is_deterministic() -> None:
     assert a.data == b.data  # identical shape/values regardless of input
 
 
+async def test_mock_provider_returns_preflight_phrasing_for_preflight_schema() -> None:
+    # The mock infers the task from the output schema (preflight schema has a top-level `issues`).
+    schema = {"properties": {"issues": {"type": "array"}}}
+    response = await MockProvider().generate_structured(system="s", user="u", output_schema=schema)
+
+    assert "issues" in response.data
+    assert "overallConfidence" not in response.data  # not the analysis payload
+    keys = {issue["checkKey"] for issue in response.data["issues"]}
+    assert "font_embedding" in keys
+    assert all(i["severity"] in {"HIGH", "MEDIUM", "LOW"} for i in response.data["issues"])
+
+
 def test_router_defaults_to_mock() -> None:
     # With no AI_PROVIDER set, the default settings select the mock provider.
     provider = get_provider()

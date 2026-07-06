@@ -1,9 +1,12 @@
 """Deterministic mock LLM provider.
 
-Returns fixed, schema-valid structured judgement so the entire analysis pipeline runs
-end-to-end with no external dependency or API key. Given the same request it always returns
-the same shape and values — ideal for local development, CI, and demos. Selected by default
-(AI_PROVIDER=mock); swap to the real Claude provider with AI_PROVIDER=claude.
+Returns fixed, schema-valid structured judgement so the entire pipeline runs end-to-end with no
+external dependency or API key. Given the same request it always returns the same shape and values —
+ideal for local development, CI, and demos. Selected by default (AI_PROVIDER=mock); swap to the real
+Claude provider with AI_PROVIDER=claude.
+
+The task is inferred from the requested ``output_schema`` (manuscript analysis vs. preflight
+phrasing) so the single mock serves both verticals; the provider abstraction is unchanged.
 """
 
 from __future__ import annotations
@@ -64,6 +67,51 @@ _MOCK_JUDGEMENT: dict[str, Any] = {
 }
 
 
+# Representative preflight phrasing, keyed by check so the normalizer overlays it onto whichever
+# findings the deterministic checks actually raised. The checks decide which issues exist; this only
+# supplies severity/title/recommendation text.
+_MOCK_PREFLIGHT: dict[str, Any] = {
+    "issues": [
+        {
+            "checkKey": "geometry",
+            "severity": "MEDIUM",
+            "title": "Page geometry needs review",
+            "recommendation": "Confirm a single trim size and add trim/bleed for the standard.",
+        },
+        {
+            "checkKey": "font_embedding",
+            "severity": "HIGH",
+            "title": "Embed all fonts",
+            "recommendation": "Embed or outline every font so text renders correctly in print.",
+        },
+        {
+            "checkKey": "image_resolution",
+            "severity": "MEDIUM",
+            "title": "Raise image resolution",
+            "recommendation": "Replace low-resolution images with 300 DPI print assets.",
+        },
+        {
+            "checkKey": "overflow",
+            "severity": "HIGH",
+            "title": "Content beyond page edge",
+            "recommendation": "Reflow overflowing content back inside the trim area.",
+        },
+        {
+            "checkKey": "placement",
+            "severity": "MEDIUM",
+            "title": "Content near trim edge",
+            "recommendation": "Move live content inside the safe margin to survive trimming.",
+        },
+        {
+            "checkKey": "accessibility",
+            "severity": "LOW",
+            "title": "Improve accessibility",
+            "recommendation": "Export a tagged PDF with a document language set.",
+        },
+    ]
+}
+
+
 class MockProvider:
     """LLMProvider implementation returning deterministic, schema-valid data."""
 
@@ -78,9 +126,16 @@ class MockProvider:
         options: dict[str, Any] | None = None,
     ) -> LLMResponse:
         # Deterministic: identical input -> identical output. A copy guards callers from mutation.
-        data = {key: _clone(value) for key, value in _MOCK_JUDGEMENT.items()}
+        payload = _MOCK_PREFLIGHT if _is_preflight_schema(output_schema) else _MOCK_JUDGEMENT
+        data = {key: _clone(value) for key, value in payload.items()}
         usage = Usage(input_tokens=0, output_tokens=0, model=self.name)
         return LLMResponse(data=data, usage=usage, raw={"provider": "mock"})
+
+
+def _is_preflight_schema(output_schema: dict[str, Any]) -> bool:
+    """The preflight phrasing schema is distinguished by its top-level ``issues`` property."""
+    properties = output_schema.get("properties", {}) if isinstance(output_schema, dict) else {}
+    return "issues" in properties
 
 
 def _clone(value: Any) -> Any:
