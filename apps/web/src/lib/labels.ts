@@ -167,3 +167,21 @@ export function metricLabel(key: string): string {
 export function auditEventLabel(eventType: string): string {
   return AUDIT_EVENT_LABEL[eventType] ?? eventType;
 }
+
+export const NOTIFICATION_TYPE_LABEL: Record<string, string> = {
+  STAGE_CHANGED: "Workflow",
+  ANALYSIS_COMPLETED: "AI Analysis",
+  PREFLIGHT_COMPLETED: "Preflight",
+  QA_SIGNED_OFF: "QA Sign-off",
+};
+
+export const NOTIFICATION_TYPE_COLOR: Record<string, ChipColor> = {
+  STAGE_CHANGED: "primary",
+  ANALYSIS_COMPLETED: "info",
+  PREFLIGHT_COMPLETED: "info",
+  QA_SIGNED_OFF: "success",
+};
+
+export function notificationTypeLabel(type: string): string {
+  return NOTIFICATION_TYPE_LABEL[type] ?? type;
+}

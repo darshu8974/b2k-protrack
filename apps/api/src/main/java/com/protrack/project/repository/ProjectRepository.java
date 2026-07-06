@@ -50,4 +50,9 @@ public interface ProjectRepository
 			AND (p.ownerId = :userId OR m.userId = :userId)
 			ORDER BY p.dueDate ASC""")
 	List<Project> findAssignedTo(@Param("org") UUID organizationId, @Param("userId") UUID userId);
+
+	@Query("""
+			SELECT DISTINCT m.userId FROM Project p JOIN p.members m
+			WHERE p.id = :projectId AND p.deletedAt IS NULL""")
+	List<UUID> findMemberUserIds(@Param("projectId") UUID projectId);
 }

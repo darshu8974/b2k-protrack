@@ -34,6 +34,9 @@ dependencies {
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:${property("jjwtVersion")}")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:${property("jjwtVersion")}")
 
+	// Outbound email (in-app + email notifications, Sprint 6)
+	implementation("org.springframework.boot:spring-boot-starter-mail")
+
 	// Persistence + migrations
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.flywaydb:flyway-core")

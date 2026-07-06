@@ -32,6 +32,19 @@ spring:
     multipart:
       max-file-size: 200MB
       max-request-size: 210MB
+  # Outbound SMTP — only used when protrack.mail.enabled=true (SmtpMailAdapter). Empty by
+  # default so no JavaMailSender is required for local/dev; LogMailAdapter is active instead.
+  mail:
+    host: ${SMTP_HOST:}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 server:
   port: ${PORT:8080}
@@ -94,4 +107,6 @@ protrack:
     internal-key: ${PROTRACK_AI_INTERNAL_KEY:dev-internal-key}
     timeout-ms: ${PROTRACK_AI_TIMEOUT_MS:120000}
   mail:
+    # false → LogMailAdapter (logs, no SMTP needed); true → SmtpMailAdapter (needs spring.mail.*).
+    enabled: ${PROTRACK_MAIL_ENABLED:false}
     from: ${PROTRACK_MAIL_FROM:no-reply@protrack.app}

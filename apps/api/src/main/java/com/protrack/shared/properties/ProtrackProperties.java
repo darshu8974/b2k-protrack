@@ -29,7 +29,13 @@ public record ProtrackProperties(
 	public record Ai(String baseUrl, String internalKey, long timeoutMs) {
 	}
 
-	/** Outbound mail settings (consumed by the notification module, Sprint 6). */
-	public record Mail(String from) {
+	/**
+	 * Outbound mail settings (consumed by the notification module, Sprint 6).
+	 *
+	 * <p>{@code enabled} selects the delivery adapter: {@code true} → {@code SmtpMailAdapter}
+	 * (requires {@code spring.mail.*}); {@code false} (default) → {@code LogMailAdapter}, which
+	 * logs the message instead of sending it (dev/demo/test). {@code from} is the sender address.
+	 */
+	public record Mail(boolean enabled, String from) {
 	}
 }

@@ -4,6 +4,7 @@ import com.protrack.project.domain.Project;
 import com.protrack.project.domain.ProjectStatus;
 import com.protrack.project.repository.ProjectRepository;
 import com.protrack.shared.error.NotFoundException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,12 @@ public class ProjectFacadeImpl implements ProjectFacade {
 				.map(project -> new ProjectContextInfo(
 						project.getId(), project.getOrganizationId(), project.getTitle(),
 						project.getPublicationType(), project.getDiscipline()));
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<UUID> findMemberUserIds(UUID projectId) {
+		return projectRepository.findMemberUserIds(projectId);
 	}
 
 	@Override

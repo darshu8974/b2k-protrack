@@ -1,5 +1,6 @@
 package com.protrack.project.spi;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,6 +22,13 @@ public interface ProjectFacade {
 	Optional<ProjectStageInfo> findStageInfo(UUID projectId);
 
 	Optional<ProjectContextInfo> findContext(UUID projectId);
+
+	/**
+	 * The user ids of a project's members (the owner is included, as owners are auto-added as
+	 * members). Used by cross-cutting subscribers (notifications) to fan out to a project's team
+	 * without reaching into the project entity.
+	 */
+	List<UUID> findMemberUserIds(UUID projectId);
 
 	/** Move a project to a new stage (and mark it COMPLETED when that stage is reached). */
 	void updateCurrentStage(UUID projectId, String newStage, UUID actedBy);
