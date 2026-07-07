@@ -6,7 +6,8 @@ ideal for local development, CI, and demos. Selected by default (AI_PROVIDER=moc
 Claude provider with AI_PROVIDER=claude.
 
 The task is inferred from the requested ``output_schema`` (manuscript analysis vs. preflight
-phrasing) so the single mock serves both verticals; the provider abstraction is unchanged.
+phrasing vs. assistant reply) so the single mock serves every vertical; the provider abstraction is
+unchanged.
 """
 
 from __future__ import annotations
@@ -112,6 +113,18 @@ _MOCK_PREFLIGHT: dict[str, Any] = {
 }
 
 
+# A stable, scoped assistant reply. The mock cannot read the real project, so it returns a helpful,
+# generic answer that still exercises the whole assistant path (schema-valid reply + citations).
+_MOCK_ASSISTANT: dict[str, Any] = {
+    "reply": (
+        "Based on the project context provided, here is a concise answer. This is a deterministic "
+        "mock response used for local development and tests — connect the Claude provider "
+        "(AI_PROVIDER=claude) for real, project-specific answers."
+    ),
+    "citations": ["projectContext.title"],
+}
+
+
 class MockProvider:
     """LLMProvider implementation returning deterministic, schema-valid data."""
 
@@ -126,16 +139,33 @@ class MockProvider:
         options: dict[str, Any] | None = None,
     ) -> LLMResponse:
         # Deterministic: identical input -> identical output. A copy guards callers from mutation.
-        payload = _MOCK_PREFLIGHT if _is_preflight_schema(output_schema) else _MOCK_JUDGEMENT
+        payload = _select_payload(output_schema)
         data = {key: _clone(value) for key, value in payload.items()}
         usage = Usage(input_tokens=0, output_tokens=0, model=self.name)
         return LLMResponse(data=data, usage=usage, raw={"provider": "mock"})
 
 
+def _select_payload(output_schema: dict[str, Any]) -> dict[str, Any]:
+    """Pick the mock payload by inspecting the requested output schema's top-level properties."""
+    if _is_assistant_schema(output_schema):
+        return _MOCK_ASSISTANT
+    if _is_preflight_schema(output_schema):
+        return _MOCK_PREFLIGHT
+    return _MOCK_JUDGEMENT
+
+
 def _is_preflight_schema(output_schema: dict[str, Any]) -> bool:
     """The preflight phrasing schema is distinguished by its top-level ``issues`` property."""
-    properties = output_schema.get("properties", {}) if isinstance(output_schema, dict) else {}
-    return "issues" in properties
+    return "issues" in _top_level_properties(output_schema)
+
+
+def _is_assistant_schema(output_schema: dict[str, Any]) -> bool:
+    """The assistant reply schema is distinguished by its top-level ``reply`` property."""
+    return "reply" in _top_level_properties(output_schema)
+
+
+def _top_level_properties(output_schema: dict[str, Any]) -> dict[str, Any]:
+    return output_schema.get("properties", {}) if isinstance(output_schema, dict) else {}
 
 
 def _clone(value: Any) -> Any:

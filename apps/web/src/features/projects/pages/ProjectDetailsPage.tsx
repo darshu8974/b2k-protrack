@@ -28,6 +28,7 @@ import { useAuth } from "../../auth/useAuth";
 import { useProjectActivity } from "../../audit/hooks";
 import { CommentsTab } from "../../comments/CommentsTab";
 import { AnalysisPanel } from "../../analysis/AnalysisPanel";
+import { AssistantPanel } from "../../assistant/AssistantPanel";
 import { DocumentsPanel } from "../../manuscripts/components/DocumentsPanel";
 import { PackagePanel } from "../../package/components/PackagePanel";
 import { PreflightQaPanel } from "../../preflight/PreflightQaPanel";
@@ -94,6 +95,7 @@ export function ProjectDetailsPage() {
           <Tab label="Files" value="files" />
           <Tab label="Comments" value="comments" />
           <Tab label="AI Analysis" value="analysis" />
+          <Tab label="Assistant" value="assistant" />
           <Tab label="Preflight & QA" value="preflight" />
           {canSeePackage && <Tab label="Package" value="package" />}
         </Tabs>
@@ -229,6 +231,8 @@ export function ProjectDetailsPage() {
       {activeTab === "analysis" && (
         <AnalysisPanel projectId={project.id} currentStage={project.currentStage} />
       )}
+
+      {activeTab === "assistant" && <AssistantPanel projectId={project.id} />}
 
       {activeTab === "preflight" && (
         <PreflightQaPanel projectId={project.id} currentStage={project.currentStage} />

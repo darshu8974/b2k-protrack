@@ -3,6 +3,8 @@ package com.protrack.ai.client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.protrack.ai.client.dto.AnalysisRequest;
 import com.protrack.ai.client.dto.AnalysisResponse;
+import com.protrack.ai.client.dto.AssistantChatRequest;
+import com.protrack.ai.client.dto.AssistantChatResponse;
 import com.protrack.ai.client.dto.PreflightRequest;
 import com.protrack.ai.client.dto.PreflightResponse;
 import com.protrack.shared.properties.ProtrackProperties;
@@ -67,6 +69,18 @@ public class FastApiClient implements AiServiceClient {
 		try {
 			PreflightResponse parsed = objectMapper.readValue(body, PreflightResponse.class);
 			return new AiPreflightResult(parsed, body);
+		} catch (Exception ex) {
+			throw new AiServiceException("Could not parse AI service response", ex);
+		}
+	}
+
+	@Override
+	@Retry(name = "aiService")
+	@CircuitBreaker(name = "aiService")
+	public AssistantChatResponse assistantChat(AssistantChatRequest request) {
+		String body = post("/internal/v1/assistant/chat", request);
+		try {
+			return objectMapper.readValue(body, AssistantChatResponse.class);
 		} catch (Exception ex) {
 			throw new AiServiceException("Could not parse AI service response", ex);
 		}

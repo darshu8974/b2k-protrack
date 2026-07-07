@@ -2,6 +2,8 @@ package com.protrack.ai.client;
 
 import com.protrack.ai.client.dto.AnalysisRequest;
 import com.protrack.ai.client.dto.AnalysisResponse;
+import com.protrack.ai.client.dto.AssistantChatRequest;
+import com.protrack.ai.client.dto.AssistantChatResponse;
 import com.protrack.ai.client.dto.PreflightRequest;
 import com.protrack.ai.client.dto.PreflightResponse;
 
@@ -23,4 +25,10 @@ public interface AiServiceClient {
 	AiAnalysisResult analyzeManuscript(AnalysisRequest request);
 
 	AiPreflightResult preflightPdf(PreflightRequest request);
+
+	/**
+	 * Ask the scoped assistant a project question. Synchronous (a chat turn is fast) — returns the
+	 * reply directly; no raw payload is retained (assistant_messages has no provenance column).
+	 */
+	AssistantChatResponse assistantChat(AssistantChatRequest request);
 }

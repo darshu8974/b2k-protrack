@@ -21,6 +21,7 @@ export const queryKeys = {
   approvals: (projectId: string) => ["project", projectId, "approvals"] as const,
   signoffs: (projectId: string) => ["project", projectId, "signoffs"] as const,
   comments: (projectId: string) => ["project", projectId, "comments"] as const,
+  assistantThread: (projectId: string) => ["project", projectId, "assistant"] as const,
   notifications: (unreadOnly: boolean) => ["notifications", { unreadOnly }] as const,
   notificationsUnreadCount: ["notifications", "unread-count"] as const,
   notificationPreferences: ["notification-preferences"] as const,

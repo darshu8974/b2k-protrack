@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "description": "The assistant's scoped answer to the user's question about this project. Answer only from the provided context and conversation; do not fabricate facts.",
+  "properties": {
+    "reply": {
+      "type": "string",
+      "description": "A concise, practical answer to the question, scoped to this project and publishing production. If the context lacks the answer, say so plainly."
+    },
+    "citations": {
+      "type": "array",
+      "description": "Optional short references to the pieces of provided context the answer drew on (e.g. context field names). Omit or leave empty if none apply.",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": ["reply"]
+}

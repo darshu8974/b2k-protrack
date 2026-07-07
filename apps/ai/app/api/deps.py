@@ -7,6 +7,7 @@ from fastapi import Depends
 from app.core.config import Settings, get_settings
 from app.core.security import verify_internal_key
 from app.orchestration.analysis_orchestrator import AnalysisOrchestrator
+from app.orchestration.assistant_orchestrator import AssistantOrchestrator
 from app.orchestration.preflight_orchestrator import PreflightOrchestrator
 from app.orchestration.progress import ProgressReporter
 from app.preflight.runner import PreflightRunner
@@ -53,6 +54,14 @@ def preflight_orchestrator_dep(
         normalizer=PreflightNormalizer(),
         reporter=ProgressReporter(settings.spring_callback_base_url, settings.internal_key),
     )
+
+
+def assistant_orchestrator_dep(
+    provider: LLMProvider = Depends(provider_dep),
+) -> AssistantOrchestrator:
+    """Assemble the scoped-assistant orchestrator from the active provider. Synchronous — no file
+    loader or progress reporter (a chat turn fetches nothing and reports no job progress)."""
+    return AssistantOrchestrator(provider=provider, prompt_registry=PromptRegistry())
 
 
 # Reusable guard for all internal business endpoints.

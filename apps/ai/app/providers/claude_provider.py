@@ -14,7 +14,11 @@ from app.core.errors import OutputValidationError, PermanentError, TransientProv
 from app.providers.base import LLMResponse, Usage
 from app.providers.retry import llm_retry
 
+# Default tool identity (manuscript analysis). Callers may override per task via ``options``
+# ({"tool_name": ..., "tool_description": ...}) so a single adapter serves every vertical while the
+# provider-neutral interface is unchanged.
 _TOOL_NAME = "emit_manuscript_analysis"
+_TOOL_DESCRIPTION = "Return the structured manuscript analysis matching the schema."
 
 
 class ClaudeProvider:
@@ -61,10 +65,14 @@ class ClaudeProvider:
             RateLimitError,
         )
 
+        opts = options or {}
+        tool_name = opts.get("tool_name", _TOOL_NAME)
+        tool_description = opts.get("tool_description", _TOOL_DESCRIPTION)
+
         client = self._get_client()
         tool = {
-            "name": _TOOL_NAME,
-            "description": "Return the structured manuscript analysis matching the schema.",
+            "name": tool_name,
+            "description": tool_description,
             "input_schema": output_schema,
         }
         try:
@@ -75,7 +83,7 @@ class ClaudeProvider:
                 system=system,
                 messages=[{"role": "user", "content": user}],
                 tools=[tool],
-                tool_choice={"type": "tool", "name": _TOOL_NAME},
+                tool_choice={"type": "tool", "name": tool_name},
             )
         except (RateLimitError, APITimeoutError, APIConnectionError) as exc:
             raise TransientProviderError(f"Claude call failed transiently: {exc}") from exc
@@ -84,7 +92,7 @@ class ClaudeProvider:
                 raise TransientProviderError(f"Claude server error: {exc}") from exc
             raise PermanentError(f"Claude rejected the request: {exc}") from exc
 
-        data = _extract_tool_input(response)
+        data = _extract_tool_input(response, tool_name)
         usage = Usage(
             input_tokens=getattr(response.usage, "input_tokens", 0),
             output_tokens=getattr(response.usage, "output_tokens", 0),
@@ -93,11 +101,11 @@ class ClaudeProvider:
         return LLMResponse(data=data, usage=usage, raw=response)
 
 
-def _extract_tool_input(response: Any) -> dict[str, Any]:
+def _extract_tool_input(response: Any, tool_name: str) -> dict[str, Any]:
     """Pull the forced tool's structured input out of the response content blocks."""
     for block in getattr(response, "content", []) or []:
         is_tool = getattr(block, "type", None) == "tool_use"
-        if is_tool and getattr(block, "name", None) == _TOOL_NAME:
+        if is_tool and getattr(block, "name", None) == tool_name:
             data = block.input
             if isinstance(data, dict):
                 return data
