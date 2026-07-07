@@ -25,4 +25,7 @@ export const queryKeys = {
   notifications: (unreadOnly: boolean) => ["notifications", { unreadOnly }] as const,
   notificationsUnreadCount: ["notifications", "unread-count"] as const,
   notificationPreferences: ["notification-preferences"] as const,
+  reportsOverview: (range: string) => ["reports", "overview", range] as const,
+  reportsThroughput: (range: string) => ["reports", "throughput", range] as const,
+  reportsWorkload: ["reports", "workload"] as const,
 };

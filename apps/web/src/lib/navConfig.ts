@@ -13,7 +13,9 @@ export interface NavSection {
 
 /**
  * Role-shaped navigation. Item paths currently point at /health (the Sprint-0 placeholder);
- * they are repointed to real routes as each feature is built.
+ * they are repointed to real routes as each feature is built. Reports is restricted to
+ * ADMIN / PM / QA (designers are excluded per the API spec), so it is omitted from the
+ * designer section rather than shown as a forbidden link.
  */
 export const navConfig: Record<Role, NavSection[]> = {
   PM: [
@@ -30,7 +32,7 @@ export const navConfig: Record<Role, NavSection[]> = {
       group: "INTELLIGENCE",
       items: [
         { label: "AI Assistant", path: "/health" },
-        { label: "Reports", path: "/health" },
+        { label: "Reports", path: "/reports" },
       ],
     },
   ],
@@ -46,10 +48,7 @@ export const navConfig: Record<Role, NavSection[]> = {
     },
     {
       group: "INTELLIGENCE",
-      items: [
-        { label: "AI Assistant", path: "/health" },
-        { label: "Reports", path: "/health" },
-      ],
+      items: [{ label: "AI Assistant", path: "/health" }],
     },
   ],
   QA: [
@@ -66,7 +65,7 @@ export const navConfig: Record<Role, NavSection[]> = {
       group: "INTELLIGENCE",
       items: [
         { label: "AI Assistant", path: "/health" },
-        { label: "Reports", path: "/health" },
+        { label: "Reports", path: "/reports" },
       ],
     },
   ],
@@ -84,7 +83,7 @@ export const navConfig: Record<Role, NavSection[]> = {
       group: "INTELLIGENCE",
       items: [
         { label: "AI Assistant", path: "/health" },
-        { label: "Reports", path: "/health" },
+        { label: "Reports", path: "/reports" },
       ],
     },
   ],

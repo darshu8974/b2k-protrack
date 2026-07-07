@@ -110,3 +110,6 @@ protrack:
     # false → LogMailAdapter (logs, no SMTP needed); true → SmtpMailAdapter (needs spring.mail.*).
     enabled: ${PROTRACK_MAIL_ENABLED:false}
     from: ${PROTRACK_MAIL_FROM:no-reply@protrack.app}
+  reporting:
+    # Cadence for the ReportSnapshotJob KPI rollups (Spring cron). Default: daily at 02:00.
+    snapshot-cron: ${PROTRACK_REPORTING_SNAPSHOT_CRON:0 0 2 * * *}
