@@ -55,4 +55,12 @@ public interface ProjectRepository
 			SELECT DISTINCT m.userId FROM Project p JOIN p.members m
 			WHERE p.id = :projectId AND p.deletedAt IS NULL""")
 	List<UUID> findMemberUserIds(@Param("projectId") UUID projectId);
+
+	/** True if the user is the owner or a member of the (non-deleted) project. */
+	@Query("""
+			SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Project p
+			LEFT JOIN p.members m
+			WHERE p.id = :projectId AND p.deletedAt IS NULL
+			AND (p.ownerId = :userId OR m.userId = :userId)""")
+	boolean isMember(@Param("projectId") UUID projectId, @Param("userId") UUID userId);
 }

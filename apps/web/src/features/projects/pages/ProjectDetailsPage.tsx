@@ -26,6 +26,7 @@ import {
 } from "../../../lib/labels";
 import { useAuth } from "../../auth/useAuth";
 import { useProjectActivity } from "../../audit/hooks";
+import { CommentsTab } from "../../comments/CommentsTab";
 import { AnalysisPanel } from "../../analysis/AnalysisPanel";
 import { DocumentsPanel } from "../../manuscripts/components/DocumentsPanel";
 import { PackagePanel } from "../../package/components/PackagePanel";
@@ -91,6 +92,7 @@ export function ProjectDetailsPage() {
         <Tabs value={activeTab} onChange={(_, value) => setTab(value)}>
           <Tab label="Overview" value="overview" />
           <Tab label="Files" value="files" />
+          <Tab label="Comments" value="comments" />
           <Tab label="AI Analysis" value="analysis" />
           <Tab label="Preflight & QA" value="preflight" />
           {canSeePackage && <Tab label="Package" value="package" />}
@@ -221,6 +223,8 @@ export function ProjectDetailsPage() {
       )}
 
       {activeTab === "files" && <DocumentsPanel projectId={project.id} />}
+
+      {activeTab === "comments" && <CommentsTab projectId={project.id} />}
 
       {activeTab === "analysis" && (
         <AnalysisPanel projectId={project.id} currentStage={project.currentStage} />
