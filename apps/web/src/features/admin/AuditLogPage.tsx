@@ -1,4 +1,6 @@
+import DownloadIcon from "@mui/icons-material/Download";
 import {
+  Button,
   Card,
   Chip,
   MenuItem,
@@ -15,6 +17,7 @@ import {
 import { useState } from "react";
 
 import { LoadingState } from "../../components/feedback/LoadingState";
+import { useDownload } from "../../hooks/useDownload";
 import { auditEventLabel } from "../../lib/labels";
 import { useAuditEvents } from "../audit/hooks";
 
@@ -24,6 +27,7 @@ export function AuditLogPage() {
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(20);
   const [eventType, setEventType] = useState("");
+  const { download, downloading } = useDownload();
 
   const { data, isLoading } = useAuditEvents({
     page,
@@ -32,9 +36,24 @@ export function AuditLogPage() {
     eventType: eventType || undefined,
   });
 
+  function exportCsv() {
+    const query = eventType ? `&eventType=${encodeURIComponent(eventType)}` : "";
+    void download(`/audit-events:export?format=csv${query}`, "audit-log.csv", "audit-csv");
+  }
+
   return (
     <Stack spacing={2}>
-      <Typography variant="h4">Audit log</Typography>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap>
+        <Typography variant="h4">Audit log</Typography>
+        <Button
+          variant="outlined"
+          startIcon={<DownloadIcon />}
+          onClick={exportCsv}
+          disabled={downloading === "audit-csv"}
+        >
+          Export CSV
+        </Button>
+      </Stack>
 
       <Card sx={{ p: 2 }}>
         <TextField

@@ -59,6 +59,48 @@ public class User {
 	protected User() {
 	}
 
+	/**
+	 * Create a new account (administrator user creation). Id is app-generated; audit columns
+	 * ({@code created_at}/{@code updated_at}) use their DB defaults. Status starts ACTIVE.
+	 */
+	public User(UUID id, UUID organizationId, String email, String passwordHash, String fullName,
+			String avatarInitials, String avatarColor) {
+		this.id = id;
+		this.organizationId = organizationId;
+		this.email = email;
+		this.passwordHash = passwordHash;
+		this.fullName = fullName;
+		this.avatarInitials = avatarInitials;
+		this.avatarColor = avatarColor;
+		this.status = "ACTIVE";
+	}
+
+	/** Update editable profile fields (administrator edit). Null arguments leave a field unchanged. */
+	public void updateProfile(String fullName, String avatarInitials, String avatarColor) {
+		if (fullName != null) {
+			this.fullName = fullName;
+		}
+		if (avatarInitials != null) {
+			this.avatarInitials = avatarInitials;
+		}
+		if (avatarColor != null) {
+			this.avatarColor = avatarColor;
+		}
+	}
+
+	/** Set the account status (ACTIVE | INACTIVE | SUSPENDED). */
+	public void changeStatus(String status) {
+		this.status = status;
+	}
+
+	public void addRole(Role role) {
+		this.roles.add(role);
+	}
+
+	public void removeRole(Role role) {
+		this.roles.remove(role);
+	}
+
 	public UUID getId() {
 		return id;
 	}

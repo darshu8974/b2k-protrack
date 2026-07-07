@@ -9,6 +9,8 @@ import com.protrack.identity.spi.IdentityFacade;
 import com.protrack.identity.spi.IdentityFacade.UserBrief;
 import com.protrack.shared.error.ApiException;
 import com.protrack.shared.web.PageResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,9 +27,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-/** Reads the audit log (admin) and the per-project activity feed. */
+/** Reads the audit log (admin), the per-project activity feed, and the CSV export. */
 @Service
 public class AuditService {
+
+	private static final int CSV_PAGE_SIZE = 500;
+	private static final DateTimeFormatter ISO = DateTimeFormatter.ISO_INSTANT;
 
 	private final AuditEventRepository auditEventRepository;
 	private final IdentityFacade identityFacade;
@@ -67,6 +72,79 @@ public class AuditService {
 				projectId, PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt")));
 		Map<UUID, UserBrief> actors = resolveActors(events);
 		return events.stream().map(event -> toResponse(event, actors)).toList();
+	}
+
+	/**
+	 * Build the (org-scoped, filtered) audit log as CSV bytes. Fetches page-by-page to bound the
+	 * query, accumulating into a buffer returned with a Content-Length (not chunked) so every client
+	 * receives a complete response. Same filters as {@link #list} (project, eventType). Phase-1 audit
+	 * volumes are modest; a true streaming export can be revisited when the log grows large.
+	 */
+	@Transactional(readOnly = true)
+	public byte[] exportCsv(UUID currentUserId, UUID projectId, String eventType) {
+		UUID organizationId = identityFacade.findOrganizationId(currentUserId)
+				.orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED",
+						"Authenticated user no longer exists."));
+
+		Specification<AuditEvent> spec = Specification
+				.where(AuditEventSpecifications.inOrganization(organizationId));
+		if (projectId != null) {
+			spec = spec.and(AuditEventSpecifications.forProject(projectId));
+		}
+		if (StringUtils.hasText(eventType)) {
+			spec = spec.and(AuditEventSpecifications.hasEventType(eventType));
+		}
+
+		StringBuilder csv = new StringBuilder();
+		writeRow(csv, "Time", "Event", "Entity Type", "Entity Id", "Summary", "Actor",
+				"Actor Type", "Project Id", "Correlation Id");
+
+		int pageNumber = 0;
+		Page<AuditEvent> page;
+		do {
+			Pageable pageable = PageRequest.of(pageNumber, CSV_PAGE_SIZE,
+					Sort.by(Sort.Direction.DESC, "createdAt"));
+			page = auditEventRepository.findAll(spec, pageable);
+			Map<UUID, UserBrief> actors = resolveActors(page.getContent());
+			for (AuditEvent event : page.getContent()) {
+				UserBrief actor = event.getActorId() == null ? null : actors.get(event.getActorId());
+				writeRow(csv,
+						event.getCreatedAt() == null ? "" : ISO.format(event.getCreatedAt()),
+						event.getEventType(),
+						event.getEntityType(),
+						event.getEntityId() == null ? "" : event.getEntityId().toString(),
+						event.getSummary(),
+						actor == null ? "" : actor.fullName(),
+						event.getActorType(),
+						event.getProjectId() == null ? "" : event.getProjectId().toString(),
+						event.getCorrelationId());
+			}
+			pageNumber++;
+		} while (page.hasNext());
+
+		return csv.toString().getBytes(StandardCharsets.UTF_8);
+	}
+
+	private static void writeRow(StringBuilder csv, String... cells) {
+		for (int i = 0; i < cells.length; i++) {
+			if (i > 0) {
+				csv.append(',');
+			}
+			csv.append(csvEscape(cells[i]));
+		}
+		csv.append("\r\n");
+	}
+
+	/** RFC-4180 escaping: wrap in quotes when the value contains a comma, quote, or newline. */
+	private static String csvEscape(String value) {
+		if (value == null) {
+			return "";
+		}
+		if (value.contains(",") || value.contains("\"") || value.contains("\n")
+				|| value.contains("\r")) {
+			return '"' + value.replace("\"", "\"\"") + '"';
+		}
+		return value;
 	}
 
 	private Map<UUID, UserBrief> resolveActors(List<AuditEvent> events) {

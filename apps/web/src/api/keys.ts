@@ -28,4 +28,6 @@ export const queryKeys = {
   reportsOverview: (range: string) => ["reports", "overview", range] as const,
   reportsThroughput: (range: string) => ["reports", "throughput", range] as const,
   reportsWorkload: ["reports", "workload"] as const,
+  adminUsers: (params: unknown) => ["admin", "users", params] as const,
+  roles: ["admin", "roles"] as const,
 };
