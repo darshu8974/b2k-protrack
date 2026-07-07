@@ -4,11 +4,11 @@ An enterprise platform that orchestrates the STEM publishing workflow **around**
 intake, AI manuscript analysis, production hand-off, PDF preflight, QA sign-off, and audit — while
 page layout stays human and offline in InDesign. AI proposes; people decide.
 
-> **Status:** Phase 1 MVP · Implementation phase · Sprint 5 complete (PDF preflight & QA sign-off —
-> production-PDF upload, AI preflight with six deterministic checks, QA issue triage, and the atomic
-> e-sign → Completed gate) on top of Sprint 4 (AI manuscript analysis), Sprint 3 (files/versioning/
-> package), Sprint 2 (projects, workflow, dashboard, audit), and Sprint 1 (auth + RBAC). Next:
-> Sprint 6 (notifications, comments, assistant, reports, admin).
+> **Status:** Phase 1 MVP · Implementation phase · Sprint 6 complete (collaboration + intelligence —
+> in-app/email notifications, project comments, a scoped AI assistant, a reports dashboard with real
+> aggregates + a scheduled snapshot job, and admin user management with audit-log CSV export) on top
+> of Sprint 5 (PDF preflight & QA sign-off), Sprint 4 (AI manuscript analysis), Sprint 3 (files/
+> versioning/package), Sprint 2 (projects, workflow, dashboard, audit), and Sprint 1 (auth + RBAC).
 >
 > The AI service defaults to a deterministic **mock** provider, so the whole pipeline runs with no
 > API key. Set `AI_PROVIDER=claude` + `ANTHROPIC_API_KEY` to use the real Claude API.
@@ -64,7 +64,7 @@ Delivery is sequenced by the [Implementation Roadmap](docs/IMPLEMENTATION_ROADMA
 ```bash
 cd apps/api
 set -a && source .env && set +a   # load DB env vars (Git Bash)
-./gradlew bootRun                 # Flyway applies V1–V8 on startup
+./gradlew bootRun                 # Flyway applies V1–V12 on startup
 ```
 
 **AI service** (FastAPI, port 8000 — optional; needed for AI analysis and PDF preflight):
@@ -86,9 +86,12 @@ npm run dev
 **Demo users** (all share the password `password`): `priya.anand@protrack.io` (PM),
 `marcus.reed@protrack.io` (Designer), `lena.ortiz@protrack.io` (QA), `david.cho@protrack.io` (Admin).
 
-**Tests:** `cd apps/api && ./gradlew test` (the Testcontainers context test needs Docker and is
-skipped without it); `cd apps/web && npm run build` (type-check); `cd apps/ai && ./.venv/Scripts/python
--m pytest` (AI service unit tests — parsers, PDF facts, providers, normalizer, analyze + preflight
+**Tests:** `cd apps/api && ./gradlew test` (pure JUnit/Mockito unit tests — security, workflow,
+ISBN, storage/upload, AI/analysis/preflight mappers, and the Sprint-6 services: notification fan-out,
+comment threading, report aggregation + snapshot job, the assistant gateway, admin user CRUD, and
+audit CSV export; the Testcontainers context test needs Docker and is skipped without it);
+`cd apps/web && npm run build` (type-check); `cd apps/ai && ./.venv/Scripts/python -m pytest` (AI
+service unit tests — parsers, PDF facts, providers, normalizer, analyze/preflight/assistant
 pipelines). The AI service also runs `ruff check .` and `mypy app` clean.
 
 ## Contributing
