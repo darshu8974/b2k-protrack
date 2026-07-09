@@ -14,6 +14,7 @@ from typing import Any
 
 from starlette.concurrency import run_in_threadpool
 
+from app.core.metrics import record_preflight_outcome
 from app.orchestration.pipeline import Pipeline, PipelineStep
 from app.orchestration.progress import ProgressReporter
 from app.parsers.pdf_parser import extract_pdf_facts
@@ -57,9 +58,10 @@ class PreflightOrchestrator:
             PipelineStep("phrase", 85, self._phrase),
             PipelineStep("normalize", 95, self._normalize),
         ]
-        pipeline = Pipeline(steps, reporter=self._reporter, job_id=request.job_id)
+        pipeline = Pipeline(steps, reporter=self._reporter, job_id=request.job_id, task="preflight")
         context = await pipeline.run({"request": request})
         result: PreflightResult = context["result"]
+        record_preflight_outcome(result.passed)
 
         await self._reporter.post(
             request.job_id,

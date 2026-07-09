@@ -58,7 +58,7 @@ class AnalysisOrchestrator:
             PipelineStep("generate", 75, self._generate),
             PipelineStep("normalize", 95, self._normalize),
         ]
-        pipeline = Pipeline(steps, reporter=self._reporter, job_id=request.job_id)
+        pipeline = Pipeline(steps, reporter=self._reporter, job_id=request.job_id, task="analysis")
         context = await pipeline.run({"request": request})
         result: AnalysisResult = context["result"]
 

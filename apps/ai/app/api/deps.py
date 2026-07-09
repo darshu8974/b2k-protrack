@@ -13,6 +13,7 @@ from app.orchestration.progress import ProgressReporter
 from app.preflight.runner import PreflightRunner
 from app.prompts.registry import PromptRegistry
 from app.providers.base import LLMProvider
+from app.providers.metered import MeteredProvider
 from app.providers.router import get_provider
 from app.services.normalizer import AnalysisNormalizer
 from app.services.preflight_normalizer import PreflightNormalizer
@@ -24,7 +25,9 @@ def settings_dep() -> Settings:
 
 
 def provider_dep() -> LLMProvider:
-    return get_provider()
+    # Wrap the active provider so every LLM call is metered (latency/tokens/cost/errors + timing
+    # logs). get_provider() stays a pure factory (used unwrapped by the readiness check).
+    return MeteredProvider(get_provider())
 
 
 def analysis_orchestrator_dep(
