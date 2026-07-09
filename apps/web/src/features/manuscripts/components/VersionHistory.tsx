@@ -99,11 +99,12 @@ export function VersionHistory({ projectId, documentId }: VersionHistoryProps) {
                   <span>
                     <IconButton
                       size="small"
+                      aria-label="Download this version"
                       disabled={downloading === version.id}
                       onClick={() => handleDownload(version)}
                     >
                       {downloading === version.id ? (
-                        <CircularProgress size={16} />
+                        <CircularProgress size={16} aria-label="Downloading" />
                       ) : (
                         <DownloadIcon fontSize="small" />
                       )}

@@ -203,6 +203,7 @@ export function PackagePanel({ projectId }: PackagePanelProps) {
                         <span>
                           <IconButton
                             size="small"
+                            aria-label="Remove from package"
                             disabled={removeItem.isPending}
                             onClick={() => removeItem.mutate(item.id)}
                           >

@@ -272,6 +272,7 @@ export function AdminUsersPage() {
                             <Tooltip title="Add role">
                               <IconButton
                                 size="small"
+                                aria-label={`Add role to ${u.fullName}`}
                                 onClick={(e) => setRoleMenu({ anchor: e.currentTarget, user: u })}
                               >
                                 <AddIcon fontSize="small" />
@@ -294,7 +295,11 @@ export function AdminUsersPage() {
                       </TableCell>
                       <TableCell align="right">
                         <Tooltip title="Edit">
-                          <IconButton size="small" onClick={() => openEdit(u)}>
+                          <IconButton
+                            size="small"
+                            aria-label={`Edit ${u.fullName}`}
+                            onClick={() => openEdit(u)}
+                          >
                             <EditOutlinedIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
@@ -302,6 +307,7 @@ export function AdminUsersPage() {
                           <span>
                             <IconButton
                               size="small"
+                              aria-label={`Deactivate ${u.fullName}`}
                               disabled={isSelf || u.status === "INACTIVE"}
                               onClick={() => {
                                 setBanner(null);

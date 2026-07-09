@@ -78,7 +78,7 @@ export function TopBar() {
           </Typography>
         </Box>
         <Tooltip title="Sign out">
-          <IconButton onClick={() => void logout()}>
+          <IconButton onClick={() => void logout()} aria-label="Sign out">
             <Avatar sx={{ width: 32, height: 32, bgcolor: ROLE_COLORS[role], fontSize: 14 }}>
               {user?.avatarInitials ?? "?"}
             </Avatar>

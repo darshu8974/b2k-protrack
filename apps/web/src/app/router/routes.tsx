@@ -1,28 +1,68 @@
+import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import { AppShell } from "../../components/layout/AppShell";
+import { LoadingState } from "../../components/feedback/LoadingState";
 import { RouteErrorBoundary } from "../../components/feedback/RouteErrorBoundary";
-import { AdminUsersPage } from "../../features/admin/AdminUsersPage";
-import { AuditLogPage } from "../../features/admin/AuditLogPage";
-import { LoginPage } from "../../features/auth/LoginPage";
-import { DashboardPage } from "../../features/dashboard/DashboardPage";
-import { HealthPage } from "../../features/health/HealthPage";
-import { NotFoundPage } from "../../features/health/NotFoundPage";
-import { CreateProjectPage } from "../../features/projects/pages/CreateProjectPage";
-import { ProjectDetailsPage } from "../../features/projects/pages/ProjectDetailsPage";
-import { ProjectsListPage } from "../../features/projects/pages/ProjectsListPage";
-import { ReportsPage } from "../../features/reports/ReportsPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { RoleRoute } from "./RoleRoute";
 
+// Route-level code-splitting: each page is a lazy chunk (Frontend Architecture §8.4/§18), so the
+// initial bundle stays small and features load on demand. Layout/guards stay eager.
+const LoginPage = lazy(() =>
+  import("../../features/auth/LoginPage").then((m) => ({ default: m.LoginPage })),
+);
+const DashboardPage = lazy(() =>
+  import("../../features/dashboard/DashboardPage").then((m) => ({ default: m.DashboardPage })),
+);
+const HealthPage = lazy(() =>
+  import("../../features/health/HealthPage").then((m) => ({ default: m.HealthPage })),
+);
+const NotFoundPage = lazy(() =>
+  import("../../features/health/NotFoundPage").then((m) => ({ default: m.NotFoundPage })),
+);
+const ProjectsListPage = lazy(() =>
+  import("../../features/projects/pages/ProjectsListPage").then((m) => ({
+    default: m.ProjectsListPage,
+  })),
+);
+const CreateProjectPage = lazy(() =>
+  import("../../features/projects/pages/CreateProjectPage").then((m) => ({
+    default: m.CreateProjectPage,
+  })),
+);
+const ProjectDetailsPage = lazy(() =>
+  import("../../features/projects/pages/ProjectDetailsPage").then((m) => ({
+    default: m.ProjectDetailsPage,
+  })),
+);
+const ReportsPage = lazy(() =>
+  import("../../features/reports/ReportsPage").then((m) => ({ default: m.ReportsPage })),
+);
+const AdminUsersPage = lazy(() =>
+  import("../../features/admin/AdminUsersPage").then((m) => ({ default: m.AdminUsersPage })),
+);
+const AuditLogPage = lazy(() =>
+  import("../../features/admin/AuditLogPage").then((m) => ({ default: m.AuditLogPage })),
+);
+
+/** Wraps lazy route elements in a Suspense fallback so chunk loads show a spinner, not a blank. */
+function Lazy({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<LoadingState />}>{children}</Suspense>;
+}
+
 /**
- * Route tree. Feature routes (dashboard, projects, workspace, qa, admin, ...) are added under
- * the AppShell as they are built; RoleRoute wraps role-restricted sections.
+ * Route tree. Pages are lazy-loaded for code-splitting; RoleRoute wraps role-restricted sections.
+ * RouteErrorBoundary catches render/loader errors per branch.
  */
 export const router = createBrowserRouter([
   {
     path: "/login",
-    element: <LoginPage />,
+    element: (
+      <Lazy>
+        <LoginPage />
+      </Lazy>
+    ),
     errorElement: <RouteErrorBoundary />,
   },
   {
@@ -57,5 +97,12 @@ export const router = createBrowserRouter([
       },
     ],
   },
-  { path: "*", element: <NotFoundPage /> },
+  {
+    path: "*",
+    element: (
+      <Lazy>
+        <NotFoundPage />
+      </Lazy>
+    ),
+  },
 ]);

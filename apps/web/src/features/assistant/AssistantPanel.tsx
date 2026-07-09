@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
+import { EmptyState } from "../../components/feedback/EmptyState";
 import { ErrorState } from "../../components/feedback/ErrorState";
 import { formatRelativeTime } from "../../lib/format";
 import type { AssistantMessage } from "../../types/assistant";
@@ -70,12 +71,10 @@ export function AssistantPanel({ projectId }: { projectId: string }) {
       <Box ref={scrollRef} sx={{ flex: 1, overflowY: "auto", pr: 1 }}>
         {isLoading ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress size={24} />
+            <CircularProgress size={24} aria-label="Loading conversation" />
           </Box>
         ) : messages.length === 0 && !pendingQuestion ? (
-          <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: "center" }}>
-            No questions yet. Ask the assistant anything about this project.
-          </Typography>
+          <EmptyState message="No questions yet. Ask the assistant anything about this project." />
         ) : (
           <Stack spacing={2}>
             {messages.map((m) => (

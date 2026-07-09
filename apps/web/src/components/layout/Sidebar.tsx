@@ -44,7 +44,7 @@ export function Sidebar() {
         </Typography>
       </Toolbar>
 
-      <Box sx={{ overflow: "auto", flex: 1 }}>
+      <Box component="nav" aria-label="Main navigation" sx={{ overflow: "auto", flex: 1 }}>
         {sections.map((section) => (
           <Box key={section.group} sx={{ px: 1, pt: 1 }}>
             <Typography

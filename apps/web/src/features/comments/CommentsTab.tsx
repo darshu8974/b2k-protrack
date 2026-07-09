@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
+import { EmptyState } from "../../components/feedback/EmptyState";
 import { ErrorState } from "../../components/feedback/ErrorState";
 import { formatRelativeTime } from "../../lib/format";
 import type { Comment } from "../../types/comment";
@@ -136,6 +137,7 @@ export function CommentsTab({ projectId }: { projectId: string }) {
                   <Tooltip title="Edit">
                     <IconButton
                       size="small"
+                      aria-label="Edit comment"
                       onClick={() => {
                         setEditingId(c.id);
                         setEditBody(c.body);
@@ -149,6 +151,7 @@ export function CommentsTab({ projectId }: { projectId: string }) {
                   <Tooltip title="Delete">
                     <IconButton
                       size="small"
+                      aria-label="Delete comment"
                       onClick={() => {
                         if (window.confirm("Delete this comment?")) {
                           deleteComment.mutate(c.id);
@@ -227,12 +230,10 @@ export function CommentsTab({ projectId }: { projectId: string }) {
 
       {isLoading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-          <CircularProgress size={24} />
+          <CircularProgress size={24} aria-label="Loading comments" />
         </Box>
       ) : roots.length === 0 ? (
-        <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: "center" }}>
-          No comments yet. Start the discussion.
-        </Typography>
+        <EmptyState message="No comments yet. Start the discussion." />
       ) : (
         <Stack spacing={2.5} divider={<Divider flexItem />}>
           {roots.map((c) => renderComment(c))}

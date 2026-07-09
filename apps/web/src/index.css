@@ -9,3 +9,40 @@ body,
   margin: 0;
   height: 100%;
 }
+
+/* Accessibility: honour the user's reduced-motion preference by neutralising animations and
+   transitions (e.g. the AI progress checklists and spinners). Loading indicators stay visible,
+   they just don't animate. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Keep keyboard focus clearly visible on any custom/native interactive element (MUI already styles
+   focus-visible for its components; this is a safety net). */
+:focus-visible {
+  outline: 2px solid #0b63ce;
+  outline-offset: 2px;
+}
+
+/* Skip link: visually hidden until focused, then revealed at the top-left. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 2000;
+  padding: 8px 16px;
+  background: #0b63ce;
+  color: #fff;
+  border-radius: 0 0 6px 0;
+  text-decoration: none;
+}
+.skip-link:focus {
+  left: 0;
+}
