@@ -1,0 +1,41 @@
+name: ci-contract
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/api-contract/**"
+      - ".github/workflows/ci-contract.yml"
+  pull_request:
+    paths:
+      - "packages/api-contract/**"
+      - ".github/workflows/ci-contract.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/api-contract
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: packages/api-contract/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate OpenAPI document
+        run: npm run validate
+
+      # Fails if src/generated/api.ts drifts from openapi.json (someone changed the spec
+      # without regenerating types). API -> spec drift is caught separately in ci-api.
+      - name: Contract drift check
+        run: npm run check
+
+      - name: Typecheck generated types
+        run: npm run typecheck

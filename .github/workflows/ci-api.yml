@@ -1,0 +1,108 @@
+name: ci-api
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/api/**"
+      - ".github/workflows/ci-api.yml"
+  pull_request:
+    paths:
+      - "apps/api/**"
+      - ".github/workflows/ci-api.yml"
+
+jobs:
+  # Compile + unit/integration tests. GitHub's ubuntu runners have Docker, so the
+  # Testcontainers context test (Postgres) runs here (it is Docker-skipped on dev machines).
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build + test
+        run: ./gradlew --no-daemon build
+
+  # End-to-end contract check: boot the real API against a throwaway Postgres, export its
+  # live OpenAPI document, regenerate the TS types, and fail if either drifts from what is
+  # committed in packages/api-contract. Catches API -> spec drift (ci-contract catches spec -> types).
+  contract-export:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: protrack
+          POSTGRES_PASSWORD: protrack
+          POSTGRES_DB: protrack
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U protrack -d protrack"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: packages/api-contract/package-lock.json
+
+      - name: Build API jar
+        working-directory: apps/api
+        run: ./gradlew --no-daemon clean bootJar -x test
+
+      - name: Boot API
+        working-directory: apps/api
+        env:
+          DATABASE_URL: jdbc:postgresql://localhost:5432/protrack
+          DATABASE_USERNAME: protrack
+          DATABASE_PASSWORD: protrack
+        run: |
+          java -jar build/libs/*.jar &
+          echo $! > /tmp/api.pid
+
+      - name: Wait for API health
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8080/api/v1/health > /dev/null; then
+              echo "API is healthy"; exit 0
+            fi
+            sleep 2
+          done
+          echo "API did not become healthy in time"; exit 1
+
+      - name: Export live OpenAPI + regenerate types
+        working-directory: packages/api-contract
+        env:
+          PROTRACK_API_URL: http://localhost:8080
+        run: |
+          npm ci
+          npm run export
+          npm run generate
+
+      - name: Fail on contract drift
+        run: git diff --exit-code -- packages/api-contract/openapi.json packages/api-contract/src/generated/api.ts
+
+      - name: Stop API
+        if: always()
+        run: kill "$(cat /tmp/api.pid)" 2>/dev/null || true

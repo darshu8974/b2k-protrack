@@ -1,0 +1,19 @@
+# Keep the build context small: never ship the local virtualenv, caches, tests,
+# or secrets into the image.
+.venv/
+__pycache__/
+*.pyc
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+tests/
+
+# Secrets / local env (only the .env.example template is tracked anyway).
+.env
+.env.*
+!.env.example
+
+# Editor/OS noise.
+.idea/
+.vscode/
+.DS_Store

@@ -1,0 +1,77 @@
+# Protrack — local full-stack (offline). Brings up a local PostgreSQL, the Spring API,
+# and the FastAPI AI service so the whole system runs without Neon or any cloud account.
+#
+#   docker compose -f infra/docker-compose.yml up --build
+#
+# The API migrates the schema (Flyway) on boot against the local Postgres below. The AI
+# service defaults to the deterministic mock provider, so no Claude key is required.
+# The web app is intentionally not containerised here — run it with Vite (`npm run dev`
+# in apps/web) or deploy it to Vercel; point it at http://localhost:8080.
+#
+# All values here are LOCAL, non-secret dev defaults. Never reuse them in a real environment.
+
+name: protrack
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: protrack
+      POSTGRES_PASSWORD: protrack
+      POSTGRES_DB: protrack
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U protrack -d protrack"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  ai:
+    build:
+      context: ../apps/ai
+    environment:
+      AI_ENVIRONMENT: local
+      # Shared secret authenticating Spring -> FastAPI; must match the API's PROTRACK_AI_INTERNAL_KEY.
+      AI_INTERNAL_KEY: dev-internal-key
+      # Deterministic pipeline, no API key. Set AI_PROVIDER=claude + ANTHROPIC_API_KEY for real Claude.
+      AI_PROVIDER: mock
+      # Where the AI service posts progress callbacks (the API, by compose service name).
+      AI_SPRING_CALLBACK_BASE_URL: http://api:8080
+      PORT: 8000
+    ports:
+      - "8000:8000"
+
+  api:
+    build:
+      context: ../apps/api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ai:
+        condition: service_started
+    environment:
+      PORT: 8080
+      SPRING_PROFILES_ACTIVE: local
+      # Local Postgres above (JDBC form; direct connection, sslmode not required in-cluster).
+      DATABASE_URL: jdbc:postgresql://postgres:5432/protrack
+      DATABASE_USERNAME: protrack
+      DATABASE_PASSWORD: protrack
+      # Dev-only JWT secret (>= 32 bytes). Override everywhere real.
+      PROTRACK_JWT_SECRET: local-dev-jwt-secret-change-me-please-min-32-bytes
+      # AI service, by compose service name; internal key must match the ai service above.
+      PROTRACK_AI_BASE_URL: http://ai:8000
+      PROTRACK_AI_INTERNAL_KEY: dev-internal-key
+      # Local file storage on a named volume so uploaded blobs survive container restarts.
+      PROTRACK_STORAGE_DRIVER: local
+      PROTRACK_STORAGE_LOCAL_PATH: /app/local-storage
+    ports:
+      - "8080:8080"
+    volumes:
+      - api-storage:/app/local-storage
+
+volumes:
+  postgres-data:
+  api-storage:
