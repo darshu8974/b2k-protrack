@@ -50,6 +50,12 @@ server:
   port: ${PORT:8080}
 
 management:
+  health:
+    mail:
+      # Only health-check SMTP when real mail delivery is enabled. The Phase-1 default is the log
+      # adapter (no SMTP configured), so Boot's auto mail probe would otherwise report DOWN and drag
+      # the whole /actuator/health aggregate down. Tied to the same flag that selects SmtpMailAdapter.
+      enabled: ${PROTRACK_MAIL_ENABLED:false}
   endpoints:
     web:
       exposure:
@@ -59,6 +65,12 @@ management:
       probes:
         enabled: true
       show-details: when_authorized
+      # Readiness = core dependencies that must be up to serve traffic (DB + storage). The AI service
+      # is a soft dependency (surfaced in /actuator/health but not gating readiness), so a transient
+      # AI outage doesn't take the app out of rotation.
+      group:
+        readiness:
+          include: readinessState, db, storage
   info:
     env:
       enabled: true
@@ -106,6 +118,10 @@ protrack:
     base-url: ${PROTRACK_AI_BASE_URL:http://localhost:8000}
     internal-key: ${PROTRACK_AI_INTERNAL_KEY:dev-internal-key}
     timeout-ms: ${PROTRACK_AI_TIMEOUT_MS:120000}
+    # Per-user rate limit for the cost-bearing AI-trigger endpoints (analysis / preflight /
+    # assistant). Read by AiRateLimiter via @Value; over-budget requests get HTTP 429.
+    rate-limit:
+      requests-per-minute: ${PROTRACK_AI_RATE_LIMIT_RPM:30}
   mail:
     # false → LogMailAdapter (logs, no SMTP needed); true → SmtpMailAdapter (needs spring.mail.*).
     enabled: ${PROTRACK_MAIL_ENABLED:false}
