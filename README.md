@@ -4,11 +4,16 @@ An enterprise platform that orchestrates the STEM publishing workflow **around**
 intake, AI manuscript analysis, production hand-off, PDF preflight, QA sign-off, and audit — while
 page layout stays human and offline in InDesign. AI proposes; people decide.
 
-> **Status:** Phase 1 MVP · Implementation phase · Sprint 6 complete (collaboration + intelligence —
-> in-app/email notifications, project comments, a scoped AI assistant, a reports dashboard with real
-> aggregates + a scheduled snapshot job, and admin user management with audit-log CSV export) on top
-> of Sprint 5 (PDF preflight & QA sign-off), Sprint 4 (AI manuscript analysis), Sprint 3 (files/
-> versioning/package), Sprint 2 (projects, workflow, dashboard, audit), and Sprint 1 (auth + RBAC).
+> **Status:** Phase 1 MVP · all feature sprints (0–6) complete; **Sprint 7 (hardening, security,
+> observability & release) in progress.** Landed in Sprint 7: backend hardening (per-user AI rate
+> limiting, DB/AI/storage health indicators), AI-service observability (Prometheus metrics,
+> cost/latency instrumentation, provider-checked readiness), frontend hardening (route code-splitting,
+> ESLint, an accessibility pass), test suites (Vitest + React Testing Library, Playwright E2E, an
+> OpenAPI contract-drift gate), and the CI/CD + infrastructure plumbing (path-filtered GitHub Actions,
+> Docker images, docker-compose, a Render blueprint). Feature history: Sprint 6 (notifications,
+> comments, AI assistant, reports, admin), Sprint 5 (PDF preflight & QA sign-off), Sprint 4 (AI
+> manuscript analysis), Sprint 3 (files/versioning/package), Sprint 2 (projects, workflow, dashboard,
+> audit), Sprint 1 (auth + RBAC).
 >
 > The AI service defaults to a deterministic **mock** provider, so the whole pipeline runs with no
 > API key. Set `AI_PROVIDER=claude` + `ANTHROPIC_API_KEY` to use the real Claude API.
@@ -86,13 +91,26 @@ npm run dev
 **Demo users** (all share the password `password`): `priya.anand@protrack.io` (PM),
 `marcus.reed@protrack.io` (Designer), `lena.ortiz@protrack.io` (QA), `david.cho@protrack.io` (Admin).
 
-**Tests:** `cd apps/api && ./gradlew test` (pure JUnit/Mockito unit tests — security, workflow,
-ISBN, storage/upload, AI/analysis/preflight mappers, and the Sprint-6 services: notification fan-out,
-comment threading, report aggregation + snapshot job, the assistant gateway, admin user CRUD, and
-audit CSV export; the Testcontainers context test needs Docker and is skipped without it);
-`cd apps/web && npm run build` (type-check); `cd apps/ai && ./.venv/Scripts/python -m pytest` (AI
-service unit tests — parsers, PDF facts, providers, normalizer, analyze/preflight/assistant
-pipelines). The AI service also runs `ruff check .` and `mypy app` clean.
+**Tests & checks:**
+
+- **API** — `cd apps/api && ./gradlew test`: JUnit/Mockito unit tests (security, workflow, ISBN,
+  storage/upload, AI/analysis/preflight mappers, the Sprint-6 services — notification fan-out, comment
+  threading, report aggregation + snapshot job, the assistant gateway, admin user CRUD, audit CSV
+  export — and the Sprint-7 hardening tests: AI rate limiter, health indicators, storage-driver swap).
+  The Testcontainers context test needs Docker and is skipped without it (it runs in CI).
+- **Web** — `cd apps/web`: `npm run lint` (ESLint), `npm run test` (Vitest + React Testing Library),
+  `npm run build` (type-check + production build), `npm run e2e` (Playwright E2E across the four roles;
+  needs the API running).
+- **AI** — `cd apps/ai`: `./.venv/Scripts/python -m pytest` (parsers, PDF facts, providers, normalizer,
+  analyze/preflight/assistant pipelines) plus `ruff check .` and `mypy app`.
+- **Contract** — `cd packages/api-contract && npm run check` (OpenAPI lint + generated-types drift gate).
+
+## Continuous integration & deployment
+
+Path-filtered GitHub Actions run per app on every push/PR — `ci-web`, `ci-api`, `ci-ai`, `ci-contract`
+(see [`.github/workflows/`](.github/workflows)). The whole stack also runs locally via Docker Compose,
+and deploys to Vercel (web) + Render (api, ai) + Neon (database). See
+[`infra/README.md`](infra/README.md) for the local stack, the CI matrix, and cloud deployment.
 
 ## Contributing
 
