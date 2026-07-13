@@ -14,6 +14,17 @@ export const STAGE_LABEL: Record<Stage, string> = {
   COMPLETED: "Completed",
 };
 
+/** Per-stage chip colors so pipeline stage pills read like the design (color-coded per stage). */
+export const STAGE_COLOR: Record<Stage, ChipColor> = {
+  INTAKE: "default",
+  AI_ANALYSIS: "secondary",
+  DESIGN_PREP: "info",
+  IN_PRODUCTION: "warning",
+  PDF_REVIEW: "primary",
+  QA_SIGNOFF: "secondary",
+  COMPLETED: "success",
+};
+
 export const STATUS_LABEL: Record<ProjectStatus, string> = {
   ACTIVE: "Active",
   ON_HOLD: "On Hold",

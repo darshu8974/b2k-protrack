@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import {
   PRIORITY_COLOR,
   PRIORITY_LABEL,
+  STAGE_COLOR,
   STAGE_LABEL,
   STATUS_COLOR,
   STATUS_LABEL,
@@ -32,7 +33,20 @@ export function ProjectsTable({ projects }: { projects: ProjectSummary[] }) {
   }
 
   return (
-    <Table size="small">
+    <Table
+      size="small"
+      sx={{
+        "& thead .MuiTableCell-root": {
+          fontSize: 11,
+          fontWeight: 600,
+          letterSpacing: 0.6,
+          textTransform: "uppercase",
+          color: "text.secondary",
+          borderBottomColor: "divider",
+        },
+        "& tbody .MuiTableCell-root": { py: 1.25 },
+      }}
+    >
       <TableHead>
         <TableRow>
           <TableCell>Project</TableCell>
@@ -62,7 +76,11 @@ export function ProjectsTable({ projects }: { projects: ProjectSummary[] }) {
               )}
             </TableCell>
             <TableCell>
-              <Chip size="small" label={STAGE_LABEL[project.currentStage]} />
+              <Chip
+                size="small"
+                color={STAGE_COLOR[project.currentStage]}
+                label={STAGE_LABEL[project.currentStage]}
+              />
             </TableCell>
             <TableCell>
               <Chip

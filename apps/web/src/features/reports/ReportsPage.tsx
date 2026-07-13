@@ -1,3 +1,8 @@
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
+import FolderOpenOutlinedIcon from "@mui/icons-material/FolderOpenOutlined";
+import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
+import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import {
   Box,
   Card,
@@ -69,11 +74,41 @@ export function ReportsPage() {
         <>
           {/* KPI cards */}
           <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
-            <KpiCard label="Avg turnaround" value={days(overview.data?.turnaroundDays ?? null)} />
-            <KpiCard label="On-time delivery" value={pct(overview.data?.onTimePercentage ?? null)} />
-            <KpiCard label="Avg AI confidence" value={pct(overview.data?.avgAiConfidence ?? null)} />
-            <KpiCard label="QA pass rate" value={pct(overview.data?.qaPassPercentage ?? null)} />
-            <KpiCard label="Completed (range)" value={overview.data?.completedProjects ?? 0} />
+            <KpiCard
+              label="Avg turnaround"
+              value={days(overview.data?.turnaroundDays ?? null)}
+              icon={<TimerOutlinedIcon />}
+              tint="#EAF2FD"
+              iconColor="#0B63CE"
+            />
+            <KpiCard
+              label="On-time delivery"
+              value={pct(overview.data?.onTimePercentage ?? null)}
+              icon={<EventAvailableOutlinedIcon />}
+              tint="#E7F5EC"
+              iconColor="#1F9D57"
+            />
+            <KpiCard
+              label="Avg AI confidence"
+              value={pct(overview.data?.avgAiConfidence ?? null)}
+              icon={<AutoAwesomeIcon />}
+              tint="#EFEDFE"
+              iconColor="#6D5EF0"
+            />
+            <KpiCard
+              label="QA pass rate"
+              value={pct(overview.data?.qaPassPercentage ?? null)}
+              icon={<VerifiedOutlinedIcon />}
+              tint="#E7F5EC"
+              iconColor="#1F9D57"
+            />
+            <KpiCard
+              label="Completed (range)"
+              value={overview.data?.completedProjects ?? 0}
+              icon={<FolderOpenOutlinedIcon />}
+              tint="#EAF2FD"
+              iconColor="#0B63CE"
+            />
           </Stack>
 
           {/* Throughput */}

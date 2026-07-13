@@ -1,3 +1,7 @@
+import BrushOutlinedIcon from "@mui/icons-material/BrushOutlined";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
+import FolderOpenOutlinedIcon from "@mui/icons-material/FolderOpenOutlined";
 import { Box, Card, LinearProgress, Stack, Typography } from "@mui/material";
 
 import { ErrorState } from "../../components/feedback/ErrorState";
@@ -26,6 +30,14 @@ export function DashboardPage() {
   return (
     <Stack spacing={3}>
       <Box>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.25 }}>
+          {new Date().toLocaleDateString(undefined, {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          })}
+        </Typography>
         <Typography variant="h4">Good morning, {firstName}</Typography>
         <Typography color="text.secondary">
           {data.kpis.totalProjects} projects across your organization.
@@ -34,10 +46,34 @@ export function DashboardPage() {
 
       {/* KPI cards */}
       <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
-        <KpiCard label="Active projects" value={data.kpis.activeProjects} />
-        <KpiCard label="In production" value={data.kpis.inProduction} />
-        <KpiCard label="Awaiting QA" value={data.kpis.awaitingQa} />
-        <KpiCard label="Completed (this month)" value={data.kpis.completedThisMonth} />
+        <KpiCard
+          label="Active projects"
+          value={data.kpis.activeProjects}
+          icon={<FolderOpenOutlinedIcon />}
+          tint="#EAF2FD"
+          iconColor="#0B63CE"
+        />
+        <KpiCard
+          label="In production"
+          value={data.kpis.inProduction}
+          icon={<BrushOutlinedIcon />}
+          tint="#EFEDFE"
+          iconColor="#6D5EF0"
+        />
+        <KpiCard
+          label="Awaiting QA"
+          value={data.kpis.awaitingQa}
+          icon={<FactCheckOutlinedIcon />}
+          tint="#FBF1E3"
+          iconColor="#C9821A"
+        />
+        <KpiCard
+          label="Completed (this month)"
+          value={data.kpis.completedThisMonth}
+          icon={<CheckCircleOutlineIcon />}
+          tint="#E7F5EC"
+          iconColor="#1F9D57"
+        />
       </Stack>
 
       <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems="stretch">
