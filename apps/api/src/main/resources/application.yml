@@ -3,37 +3,36 @@ spring:
     name: protrack-api
   profiles:
     default: local
-  # Datasource — Neon PostgreSQL, supplied entirely via environment variables.
-  # Never hardcode credentials here. Set DATABASE_URL / DATABASE_USERNAME / DATABASE_PASSWORD.
-  # Empty defaults let the Testcontainers integration test inject its own connection.
+
   datasource:
     url: ${DATABASE_URL:}
     username: ${DATABASE_USERNAME:}
     password: ${DATABASE_PASSWORD:}
+
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: none          # schema is owned by Flyway, never by Hibernate
+      ddl-auto: none
     properties:
       hibernate:
         format_sql: false
+
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: false
+
   data:
     web:
       pageable:
         default-page-size: 20
         max-page-size: 100
-  # Multipart uploads (documents/manuscripts). Hard container caps; the files module also
-  # enforces per-type size limits at the service layer (returning 422 on violation).
+
   servlet:
     multipart:
       max-file-size: 200MB
       max-request-size: 210MB
-  # Outbound SMTP — only used when protrack.mail.enabled=true (SmtpMailAdapter). Empty by
-  # default so no JavaMailSender is required for local/dev; LogMailAdapter is active instead.
+
   mail:
     host: ${SMTP_HOST:}
     port: ${SMTP_PORT:587}
@@ -52,25 +51,22 @@ server:
 management:
   health:
     mail:
-      # Only health-check SMTP when real mail delivery is enabled. The Phase-1 default is the log
-      # adapter (no SMTP configured), so Boot's auto mail probe would otherwise report DOWN and drag
-      # the whole /actuator/health aggregate down. Tied to the same flag that selects SmtpMailAdapter.
       enabled: ${PROTRACK_MAIL_ENABLED:false}
+
   endpoints:
     web:
       exposure:
         include: health,info,metrics,prometheus
+
   endpoint:
     health:
       probes:
         enabled: true
       show-details: when_authorized
-      # Readiness = core dependencies that must be up to serve traffic (DB + storage). The AI service
-      # is a soft dependency (surfaced in /actuator/health but not gating readiness), so a transient
-      # AI outage doesn't take the app out of rotation.
       group:
         readiness:
-          include: readinessState, db, storage
+          include: readinessState,db,storage
+
   info:
     env:
       enabled: true
@@ -81,8 +77,6 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
-# Resilience for the outbound FastAPI AI call. Retries transient failures and trips a circuit
-# breaker on sustained outages; the AiJob is then marked FAILED (never a 500 to the client).
 resilience4j:
   retry:
     instances:
@@ -93,6 +87,7 @@ resilience4j:
         retry-exceptions:
           - com.protrack.ai.client.AiServiceUnavailableException
           - org.springframework.web.client.ResourceAccessException
+
   circuitbreaker:
     instances:
       aiService:
@@ -104,28 +99,36 @@ resilience4j:
           - com.protrack.ai.client.AiServiceUnavailableException
           - org.springframework.web.client.ResourceAccessException
 
-# ───────────── Protrack typed configuration (see ProtrackProperties) ─────────────
 protrack:
   version: 0.1.0
+
   jwt:
     secret: ${PROTRACK_JWT_SECRET:dev-only-change-me-please-min-32-bytes-long}
     access-ttl: PT15M
     refresh-ttl: P7D
+
   storage:
     driver: ${PROTRACK_STORAGE_DRIVER:local}
     local-path: ${PROTRACK_STORAGE_LOCAL_PATH:./local-storage}
+
   ai:
     base-url: ${PROTRACK_AI_BASE_URL:http://localhost:8000}
     internal-key: ${PROTRACK_AI_INTERNAL_KEY:dev-internal-key}
     timeout-ms: ${PROTRACK_AI_TIMEOUT_MS:120000}
-    # Per-user rate limit for the cost-bearing AI-trigger endpoints (analysis / preflight /
-    # assistant). Read by AiRateLimiter via @Value; over-budget requests get HTTP 429.
+
     rate-limit:
       requests-per-minute: ${PROTRACK_AI_RATE_LIMIT_RPM:30}
+
   mail:
-    # false → LogMailAdapter (logs, no SMTP needed); true → SmtpMailAdapter (needs spring.mail.*).
     enabled: ${PROTRACK_MAIL_ENABLED:false}
     from: ${PROTRACK_MAIL_FROM:no-reply@protrack.app}
+
   reporting:
-    # Cadence for the ReportSnapshotJob KPI rollups (Spring cron). Default: daily at 02:00.
     snapshot-cron: ${PROTRACK_REPORTING_SNAPSHOT_CRON:0 0 2 * * *}
+
+logging:
+  level:
+    root: INFO
+    org.springframework.beans.factory.support: DEBUG
+    org.springframework.context.support: DEBUG
+    org.springframework.boot: INFO
