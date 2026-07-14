@@ -1,12 +1,7 @@
 package com.protrack.shared.config;
 
-import com.protrack.shared.properties.ProtrackProperties;
-import com.protrack.shared.security.InternalKeyFilter;
-import com.protrack.shared.security.JwtAuthenticationFilter;
-import com.protrack.shared.security.JwtService;
-import com.protrack.shared.security.RestAccessDeniedHandler;
-import com.protrack.shared.security.RestAuthenticationEntryPoint;
 import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,6 +19,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import com.protrack.shared.properties.ProtrackProperties;
+import com.protrack.shared.security.InternalKeyFilter;
+import com.protrack.shared.security.JwtAuthenticationFilter;
+import com.protrack.shared.security.JwtService;
+import com.protrack.shared.security.RestAccessDeniedHandler;
+import com.protrack.shared.security.RestAuthenticationEntryPoint;
 
 /**
  * Spring Security foundation: stateless JWT-based resource server. PasswordEncoder (BCrypt),
@@ -103,7 +105,10 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration config = new CorsConfiguration();
 		// Dev origins; production origin(s) are added when the frontend is deployed.
-		config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:4173"));
+		config.setAllowedOrigins(List.of(
+    "http://localhost:5173",
+    "http://localhost:4173",
+    "https://b2k-protrack.vercel.app"));
 		config.setAllowedMethods(List.of("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"));
 		config.setAllowedHeaders(List.of("*"));
 		config.setExposedHeaders(List.of("X-Correlation-Id"));
