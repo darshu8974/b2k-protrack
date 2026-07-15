@@ -62,7 +62,7 @@ management:
     health:
       probes:
         enabled: true
-      show-details: when_authorized
+      show-details: always
       group:
         readiness:
           include: readinessState,db,storage
