@@ -77,7 +77,7 @@ export function PackagePanel({ projectId }: PackagePanelProps) {
           Assemble a hand-off package from the project's current document versions.
         </Typography>
         <Can
-          roles={["PM", "ADMIN"]}
+          roles={["PROJECT_MANAGER", "ADMIN"]}
           fallback={
             <Typography variant="caption" color="text.secondary">
               A project manager can assemble the package.
@@ -136,7 +136,7 @@ export function PackagePanel({ projectId }: PackagePanelProps) {
             </Box>
           </Stack>
           <Stack direction="row" spacing={1}>
-            <Can roles={["PM", "ADMIN"]}>
+            <Can roles={["PROJECT_MANAGER", "ADMIN"]}>
               <Button
                 variant="outlined"
                 disabled={assemble.isPending}
@@ -198,7 +198,7 @@ export function PackagePanel({ projectId }: PackagePanelProps) {
                   </TableCell>
                   <TableCell>{formatBytes(item.sizeBytes)}</TableCell>
                   <TableCell align="right">
-                    <Can roles={["PM", "ADMIN"]}>
+                    <Can roles={["PROJECT_MANAGER", "ADMIN"]}>
                       <Tooltip title="Remove from package">
                         <span>
                           <IconButton

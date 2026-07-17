@@ -10,7 +10,7 @@ import { login } from "./helpers";
  */
 test.describe("project lifecycle (PM)", () => {
   test("PM creates a project and it appears in the list", async ({ page }) => {
-    await login(page, "PM");
+    await login(page, "PROJECT_MANAGER");
 
     const title = `E2E Playwright ${Date.now()}`;
 
@@ -36,7 +36,7 @@ test.describe("project lifecycle (PM)", () => {
   });
 
   test("non-PM roles cannot open the create-project route", async ({ page }) => {
-    await login(page, "DESIGNER");
+    await login(page, "PAGINATOR");
     await page.goto("/projects/new");
     await expect(page.getByRole("heading", { name: "403" })).toBeVisible();
   });

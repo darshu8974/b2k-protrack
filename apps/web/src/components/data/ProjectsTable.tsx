@@ -1,3 +1,4 @@
+import FolderOpenOutlinedIcon from "@mui/icons-material/FolderOpenOutlined";
 import {
   Chip,
   Table,
@@ -7,8 +8,10 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { EmptyState } from "../feedback/EmptyState";
 import {
   PRIORITY_COLOR,
   PRIORITY_LABEL,
@@ -20,15 +23,19 @@ import {
 import { paths } from "../../app/router/paths";
 import type { ProjectSummary } from "../../types/project";
 
-/** Reusable, clickable table of project summaries. */
-export function ProjectsTable({ projects }: { projects: ProjectSummary[] }) {
+/** Reusable, clickable table of project summaries. Callers can supply a tailored empty state. */
+export function ProjectsTable({
+  projects,
+  emptyState,
+}: {
+  projects: ProjectSummary[];
+  emptyState?: ReactNode;
+}) {
   const navigate = useNavigate();
 
   if (projects.length === 0) {
     return (
-      <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
-        No projects.
-      </Typography>
+      <>{emptyState ?? <EmptyState icon={<FolderOpenOutlinedIcon />} message="No projects to show." />}</>
     );
   }
 

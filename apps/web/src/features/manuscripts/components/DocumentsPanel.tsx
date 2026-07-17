@@ -41,7 +41,7 @@ export function DocumentsPanel({ projectId }: DocumentsPanelProps) {
     <Stack spacing={2}>
       <Stack direction="row" alignItems="center" justifyContent="space-between">
         <Typography variant="subtitle1">Documents</Typography>
-        <Can roles={["PM", "DESIGNER", "ADMIN"]}>
+        <Can roles={["PROJECT_MANAGER", "PAGINATOR", "ADMIN"]}>
           <Button
             variant="contained"
             startIcon={<UploadFileIcon />}
@@ -124,7 +124,7 @@ function DocumentRow({
       <AccordionDetails sx={{ bgcolor: "background.default" }}>
         <Stack spacing={1.5}>
           <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-            <Can roles={["PM", "DESIGNER", "ADMIN"]}>
+            <Can roles={["PROJECT_MANAGER", "PAGINATOR", "ADMIN"]}>
               <Button size="small" startIcon={<UploadFileIcon />} onClick={onUploadVersion}>
                 Upload new version
               </Button>

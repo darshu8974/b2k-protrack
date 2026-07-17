@@ -31,7 +31,7 @@ public class AnalysisController {
 	}
 
 	@PostMapping
-	@PreAuthorize("hasAnyRole('PM', 'ADMIN')")
+	@PreAuthorize("hasAnyRole('PROJECT_MANAGER', 'ADMIN')")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	public AiJobResponse start(@PathVariable UUID projectId, Principal principal) {
 		return orchestrator.startManuscriptAnalysis(UUID.fromString(principal.getName()), projectId);

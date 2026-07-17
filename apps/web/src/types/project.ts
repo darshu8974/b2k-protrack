@@ -4,6 +4,7 @@ export type Stage =
   | "DESIGN_PREP"
   | "IN_PRODUCTION"
   | "PDF_REVIEW"
+  | "QC_REVIEW"
   | "QA_SIGNOFF"
   | "COMPLETED";
 

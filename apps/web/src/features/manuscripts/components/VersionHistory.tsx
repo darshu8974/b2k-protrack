@@ -82,7 +82,7 @@ export function VersionHistory({ projectId, documentId }: VersionHistoryProps) {
             <TableCell align="right">
               <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
                 {!version.current && (
-                  <Can roles={["PM", "ADMIN"]}>
+                  <Can roles={["PROJECT_MANAGER", "ADMIN"]}>
                     <Button
                       size="small"
                       variant="outlined"

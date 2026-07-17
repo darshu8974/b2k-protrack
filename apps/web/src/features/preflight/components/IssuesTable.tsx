@@ -38,7 +38,7 @@ interface IssuesTableProps {
 const SEVERITIES = ["HIGH", "MEDIUM", "LOW"];
 const STATUSES = ["OPEN", "TRIAGED", "RESOLVED", "WAIVED"];
 
-/** QA triage table: filter by severity/status, decide per-row, and bulk-decide a selection. */
+/** QC triage table: filter by severity/status, decide per-row, and bulk-decide a selection. */
 export function IssuesTable({ projectId, issues, canDecide = true }: IssuesTableProps) {
   const [severity, setSeverity] = useState("");
   const [status, setStatus] = useState("");
@@ -134,7 +134,7 @@ export function IssuesTable({ projectId, issues, canDecide = true }: IssuesTable
         </TextField>
         <Box sx={{ flex: 1 }} />
         {canDecide && (
-          <Can roles={["QA", "ADMIN"]}>
+          <Can roles={["QC", "ADMIN"]}>
             <Button
               variant="outlined"
               size="small"
@@ -153,7 +153,7 @@ export function IssuesTable({ projectId, issues, canDecide = true }: IssuesTable
             <TableRow>
               {canDecide && (
                 <TableCell padding="checkbox">
-                  <Can roles={["QA", "ADMIN"]}>
+                  <Can roles={["QC", "ADMIN"]}>
                     <Checkbox
                       checked={allSelected}
                       indeterminate={selected.size > 0 && !allSelected}
@@ -174,7 +174,7 @@ export function IssuesTable({ projectId, issues, canDecide = true }: IssuesTable
               <TableRow key={issue.id} hover>
                 {canDecide && (
                   <TableCell padding="checkbox">
-                    <Can roles={["QA", "ADMIN"]}>
+                    <Can roles={["QC", "ADMIN"]}>
                       <Checkbox checked={selected.has(issue.id)} onChange={() => toggle(issue.id)} />
                     </Can>
                   </TableCell>
@@ -214,7 +214,7 @@ export function IssuesTable({ projectId, issues, canDecide = true }: IssuesTable
                 </TableCell>
                 {canDecide && (
                   <TableCell align="right">
-                    <Can roles={["QA", "ADMIN"]}>
+                    <Can roles={["QC", "ADMIN"]}>
                       <Button size="small" onClick={() => setDialog({ ids: [issue.id], title: issue.title })}>
                         Decide
                       </Button>

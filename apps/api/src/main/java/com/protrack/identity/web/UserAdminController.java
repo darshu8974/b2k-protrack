@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Administrator identity management (API Specification §3.2). The URL prefix ({@code /admin/*})
  * continues the Sprint-1 admin surface; RBAC is enforced per-method with {@code @PreAuthorize}
- * (users = ADMIN; roles reference = ADMIN/PM; permissions = ADMIN). Non-admins receive 403 via the
+ * (users = ADMIN; roles reference = ADMIN/PROJECT_MANAGER; permissions = ADMIN). Non-admins receive 403 via the
  * access-denied handler. Self-lockout guards live in {@link UserService}.
  */
 @RestController
@@ -85,6 +85,13 @@ public class UserAdminController {
 		return ResponseEntity.noContent().build();
 	}
 
+	@DeleteMapping("/users/{id}/permanent")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Void> delete(@PathVariable UUID id, Principal principal) {
+		userService.deleteUser(currentUser(principal), id);
+		return ResponseEntity.noContent().build();
+	}
+
 	@PostMapping("/users/{id}/roles")
 	@PreAuthorize("hasRole('ADMIN')")
 	public AdminUserResponse assignRole(@PathVariable UUID id,
@@ -107,7 +114,7 @@ public class UserAdminController {
 	}
 
 	@GetMapping("/roles")
-	@PreAuthorize("hasAnyRole('ADMIN', 'PM')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'PROJECT_MANAGER')")
 	public List<RoleResponse> roles() {
 		return userService.listRoles();
 	}

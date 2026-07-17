@@ -16,11 +16,11 @@ export interface NavSection {
 /**
  * Role-shaped navigation. Item paths currently point at /health (the Sprint-0 placeholder);
  * they are repointed to real routes as each feature is built. Reports is restricted to
- * ADMIN / PM / QA (designers are excluded per the API spec), so it is omitted from the
- * designer section rather than shown as a forbidden link.
+ * ADMIN / PROJECT_MANAGER / QC / QA (paginators are excluded per the API spec), so it is omitted
+ * from the paginator section rather than shown as a forbidden link.
  */
 export const navConfig: Record<Role, NavSection[]> = {
-  PM: [
+  PROJECT_MANAGER: [
     {
       group: "WORKSPACE",
       items: [
@@ -38,7 +38,7 @@ export const navConfig: Record<Role, NavSection[]> = {
       ],
     },
   ],
-  DESIGNER: [
+  PAGINATOR: [
     {
       group: "WORKSPACE",
       items: [
@@ -53,12 +53,30 @@ export const navConfig: Record<Role, NavSection[]> = {
       items: [{ label: "AI Assistant", path: "/health", icon: "assistant" }],
     },
   ],
+  QC: [
+    {
+      group: "WORKSPACE",
+      items: [
+        { label: "Dashboard", path: "/dashboard", icon: "dashboard" },
+        { label: "QC queue", path: "/health", icon: "qa" },
+        { label: "PDF reviews", path: "/health", icon: "review" },
+        { label: "Projects", path: "/projects", icon: "folder" },
+      ],
+    },
+    {
+      group: "INTELLIGENCE",
+      items: [
+        { label: "AI Assistant", path: "/health", icon: "assistant" },
+        { label: "Reports", path: "/reports", icon: "reports" },
+      ],
+    },
+  ],
   QA: [
     {
       group: "WORKSPACE",
       items: [
         { label: "Dashboard", path: "/dashboard", icon: "dashboard" },
-        { label: "QA queue", path: "/health", icon: "qa" },
+        { label: "Sign-off queue", path: "/health", icon: "qa" },
         { label: "PDF reviews", path: "/health", icon: "review" },
         { label: "Projects", path: "/projects", icon: "folder" },
       ],

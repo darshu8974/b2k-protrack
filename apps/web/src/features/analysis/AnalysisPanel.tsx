@@ -102,7 +102,7 @@ export function AnalysisPanel({ projectId, currentStage }: AnalysisPanelProps) {
           error={job?.errorMessage}
         />
         {jobFailed && (
-          <Can roles={["PM", "ADMIN"]}>
+          <Can roles={["PROJECT_MANAGER", "ADMIN"]}>
             <Button sx={{ mt: 2 }} variant="contained" onClick={runAnalysis}>
               Try again
             </Button>
@@ -132,7 +132,7 @@ export function AnalysisPanel({ projectId, currentStage }: AnalysisPanelProps) {
           </Alert>
         )}
         <Can
-          roles={["PM", "ADMIN"]}
+          roles={["PROJECT_MANAGER", "ADMIN"]}
           fallback={
             <Typography variant="caption" color="text.secondary">
               A project manager can run the analysis.
@@ -177,13 +177,13 @@ export function AnalysisPanel({ projectId, currentStage }: AnalysisPanelProps) {
             {analysis.summary && <Typography variant="body2">{analysis.summary}</Typography>}
           </Box>
           <Stack direction="row" spacing={1}>
-            <Can roles={["PM", "ADMIN"]}>
+            <Can roles={["PROJECT_MANAGER", "ADMIN"]}>
               <Button variant="outlined" onClick={runAnalysis} disabled={startAnalysis.isPending}>
                 Re-run
               </Button>
             </Can>
             {currentStage === "AI_ANALYSIS" && (
-              <Can roles={["PM", "ADMIN"]}>
+              <Can roles={["PROJECT_MANAGER", "ADMIN"]}>
                 <Button
                   variant="contained"
                   onClick={startProductionNow}

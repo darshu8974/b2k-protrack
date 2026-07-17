@@ -18,18 +18,18 @@ function asUser(user: UserSummary | null) {
 
 const pm: UserSummary = {
   id: "1",
-  fullName: "Priya Anand",
-  email: "priya@protrack.io",
-  roles: ["PM"],
+  fullName: "Project Manager",
+  email: "pm@protrack.io",
+  roles: ["PROJECT_MANAGER"],
   permissions: ["project.create"],
-  avatarInitials: "PA",
+  avatarInitials: "PM",
 };
 
 describe("<Can>", () => {
   it("renders children when the user holds one of the allowed roles", () => {
     asUser(pm);
     render(
-      <Can roles={["PM", "ADMIN"]}>
+      <Can roles={["PROJECT_MANAGER", "ADMIN"]}>
         <span>allowed</span>
       </Can>,
     );
@@ -50,7 +50,7 @@ describe("<Can>", () => {
   it("requires both role and permission when both are provided", () => {
     asUser(pm);
     render(
-      <Can roles={["PM"]} permission="project.delete" fallback={<span>denied</span>}>
+      <Can roles={["PROJECT_MANAGER"]} permission="project.delete" fallback={<span>denied</span>}>
         <span>allowed</span>
       </Can>,
     );
@@ -70,7 +70,7 @@ describe("<Can>", () => {
   it("renders the fallback when there is no authenticated user", () => {
     asUser(null);
     render(
-      <Can roles={["PM"]} fallback={<span>denied</span>}>
+      <Can roles={["PROJECT_MANAGER"]} fallback={<span>denied</span>}>
         <span>allowed</span>
       </Can>,
     );

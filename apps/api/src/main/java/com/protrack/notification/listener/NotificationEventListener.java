@@ -32,6 +32,7 @@ public class NotificationEventListener {
 			"DESIGN_PREP", "Design Prep",
 			"IN_PRODUCTION", "In Production",
 			"PDF_REVIEW", "PDF Review",
+			"QC_REVIEW", "QC Review",
 			"QA_SIGNOFF", "QA Sign-off",
 			"COMPLETED", "Completed");
 

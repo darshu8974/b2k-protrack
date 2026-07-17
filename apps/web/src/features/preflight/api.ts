@@ -100,7 +100,17 @@ export async function listSignoffs(projectId: string): Promise<Signoff[]> {
   return data;
 }
 
-/** Advance the workflow PDF_REVIEW → QA_SIGNOFF (SEND_TO_QA transition). */
-export async function sendToQa(projectId: string): Promise<void> {
+/** Advance the workflow PDF_REVIEW → QC_REVIEW (SEND_TO_QC transition). */
+export async function sendToQc(projectId: string): Promise<void> {
+  await apiClient.post(`/projects/${projectId}/transitions`, { toStage: "QC_REVIEW" });
+}
+
+/** QC approves the paginator's work: QC_REVIEW → QA_SIGNOFF (QC_APPROVE transition). */
+export async function qcApprove(projectId: string): Promise<void> {
   await apiClient.post(`/projects/${projectId}/transitions`, { toStage: "QA_SIGNOFF" });
+}
+
+/** QC rejects the paginator's work: QC_REVIEW → IN_PRODUCTION (REJECT_FROM_QC transition). */
+export async function qcReject(projectId: string): Promise<void> {
+  await apiClient.post(`/projects/${projectId}/transitions`, { toStage: "IN_PRODUCTION" });
 }

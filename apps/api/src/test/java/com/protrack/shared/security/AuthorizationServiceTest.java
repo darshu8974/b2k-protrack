@@ -29,7 +29,7 @@ class AuthorizationServiceTest {
 		authenticateWith("ROLE_ADMIN", "PROJECT_CREATE");
 
 		assertThat(authz.hasAnyRole("ADMIN")).isTrue();
-		assertThat(authz.hasAnyRole("PM", "QA")).isFalse();
+		assertThat(authz.hasAnyRole("PROJECT_MANAGER", "QA")).isFalse();
 		assertThat(authz.hasPermission("PROJECT_CREATE")).isTrue();
 		assertThat(authz.hasPermission("OTHER")).isFalse();
 	}

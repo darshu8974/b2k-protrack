@@ -39,7 +39,7 @@ public class ProjectController {
 	}
 
 	@PostMapping
-	@PreAuthorize("hasAnyRole('PM', 'ADMIN')")
+	@PreAuthorize("hasAnyRole('PROJECT_MANAGER', 'ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ProjectResponse create(@Valid @RequestBody CreateProjectRequest request, Principal principal) {
 		return projectService.create(currentUserId(principal), request);
@@ -51,7 +51,7 @@ public class ProjectController {
 	}
 
 	@PatchMapping("/{id}")
-	@PreAuthorize("hasAnyRole('PM', 'ADMIN')")
+	@PreAuthorize("hasAnyRole('PROJECT_MANAGER', 'ADMIN')")
 	public ProjectResponse update(@PathVariable UUID id,
 			@Valid @RequestBody UpdateProjectRequest request, Principal principal) {
 		return projectService.update(currentUserId(principal), id, request);
@@ -72,7 +72,7 @@ public class ProjectController {
 	}
 
 	@PostMapping("/{id}/members")
-	@PreAuthorize("hasAnyRole('PM', 'ADMIN')")
+	@PreAuthorize("hasAnyRole('PROJECT_MANAGER', 'ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
 	public List<ProjectMemberResponse> assignMembers(@PathVariable UUID id,
 			@Valid @RequestBody AssignMembersRequest request, Principal principal) {

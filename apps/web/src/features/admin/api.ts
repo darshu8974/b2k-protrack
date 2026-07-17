@@ -74,6 +74,11 @@ export async function deactivateUser(id: string): Promise<void> {
   await apiClient.delete(`/admin/users/${id}`);
 }
 
+/** Permanently delete a user (hard delete). 409 if the user is still referenced by activity. */
+export async function deleteUser(id: string): Promise<void> {
+  await apiClient.delete(`/admin/users/${id}/permanent`);
+}
+
 export async function assignRole(id: string, roleId: number): Promise<AdminUser> {
   const { data } = await apiClient.post<AdminUser>(`/admin/users/${id}/roles`, { roleId });
   return data;

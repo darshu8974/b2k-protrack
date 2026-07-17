@@ -46,8 +46,9 @@ describe("preflight check ordering", () => {
 });
 
 describe("stage labels", () => {
-  it("covers all seven workflow stages", () => {
-    expect(Object.keys(STAGE_LABEL)).toHaveLength(7);
+  it("covers all eight workflow stages", () => {
+    expect(Object.keys(STAGE_LABEL)).toHaveLength(8);
+    expect(STAGE_LABEL.QC_REVIEW).toBe("QC Review");
     expect(STAGE_LABEL.QA_SIGNOFF).toBe("QA Sign-off");
   });
 });

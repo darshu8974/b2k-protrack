@@ -62,7 +62,7 @@ describe("<LoginPage>", () => {
     await user.click(screen.getByRole("button", { name: /sign in/i }));
 
     await waitFor(() => {
-      expect(login).toHaveBeenCalledWith("priya.anand@protrack.io", "password");
+      expect(login).toHaveBeenCalledWith("admin@protrack.io", "password");
     });
     expect(await screen.findByText("Dashboard Home")).toBeInTheDocument();
   });

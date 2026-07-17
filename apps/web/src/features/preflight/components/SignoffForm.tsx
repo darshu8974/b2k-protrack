@@ -97,7 +97,7 @@ export function SignoffForm({ projectId, highOpenCount, defaultScore }: SignoffF
           value={signature}
           onChange={(e) => setSignature(e.target.value)}
           required
-          placeholder="e.g. Lena Ortiz"
+          placeholder="e.g. QA Approver"
         />
         <TextField
           label="Notes (optional)"

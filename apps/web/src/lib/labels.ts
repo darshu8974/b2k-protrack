@@ -10,6 +10,7 @@ export const STAGE_LABEL: Record<Stage, string> = {
   DESIGN_PREP: "Design Prep",
   IN_PRODUCTION: "In Production",
   PDF_REVIEW: "PDF Review",
+  QC_REVIEW: "QC Review",
   QA_SIGNOFF: "QA Sign-off",
   COMPLETED: "Completed",
 };
@@ -21,6 +22,7 @@ export const STAGE_COLOR: Record<Stage, ChipColor> = {
   DESIGN_PREP: "info",
   IN_PRODUCTION: "warning",
   PDF_REVIEW: "primary",
+  QC_REVIEW: "warning",
   QA_SIGNOFF: "secondary",
   COMPLETED: "success",
 };

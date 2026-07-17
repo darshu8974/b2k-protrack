@@ -92,7 +92,7 @@ class SignoffServiceTest {
 		when(decisionRepository.findDecidedIssueIds(any())).thenReturn(Set.of()); // none decided
 
 		assertThatThrownBy(() -> service.signOff(actor, projectId,
-				new SignoffRequest("APPROVED", 90, "Lena Ortiz", null)))
+				new SignoffRequest("APPROVED", 90, "QA Approver", null)))
 				.isInstanceOfSatisfying(ApiException.class,
 						ex -> assertThat(ex.getCode()).isEqualTo("HIGH_ISSUES_UNTRIAGED"));
 
@@ -109,7 +109,7 @@ class SignoffServiceTest {
 		transitionReturns("COMPLETED");
 
 		SignoffResponse response = service.signOff(actor, projectId,
-				new SignoffRequest("APPROVED", 95, "Lena Ortiz", "All resolved."));
+				new SignoffRequest("APPROVED", 95, "QA Approver", "All resolved."));
 
 		assertThat(response.decision()).isEqualTo("APPROVED");
 		assertThat(response.stage()).isEqualTo("COMPLETED");
@@ -125,7 +125,7 @@ class SignoffServiceTest {
 		transitionReturns("IN_PRODUCTION");
 
 		SignoffResponse response = service.signOff(actor, projectId,
-				new SignoffRequest("REJECTED", 40, "Lena Ortiz", "Needs rework."));
+				new SignoffRequest("REJECTED", 40, "QA Approver", "Needs rework."));
 
 		assertThat(response.stage()).isEqualTo("IN_PRODUCTION");
 		verify(workflowService).transition(eq(actor), eq(projectId), eq("IN_PRODUCTION"), any());
@@ -138,7 +138,7 @@ class SignoffServiceTest {
 		when(preflightFacade.findLatestRun(projectId)).thenReturn(Optional.empty());
 
 		assertThatThrownBy(() -> service.signOff(actor, projectId,
-				new SignoffRequest("APPROVED", 90, "Lena Ortiz", null)))
+				new SignoffRequest("APPROVED", 90, "QA Approver", null)))
 				.isInstanceOfSatisfying(ApiException.class,
 						ex -> assertThat(ex.getCode()).isEqualTo("NO_PREFLIGHT"));
 	}
@@ -146,7 +146,7 @@ class SignoffServiceTest {
 	@Test
 	void invalidDecisionIsRejected() {
 		assertThatThrownBy(() -> service.signOff(actor, projectId,
-				new SignoffRequest("MAYBE", 90, "Lena Ortiz", null)))
+				new SignoffRequest("MAYBE", 90, "QA Approver", null)))
 				.isInstanceOfSatisfying(ApiException.class,
 						ex -> assertThat(ex.getCode()).isEqualTo("INVALID_DECISION"));
 	}

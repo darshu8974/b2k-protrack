@@ -88,8 +88,9 @@ npm install
 npm run dev
 ```
 
-**Demo users** (all share the password `password`): `priya.anand@protrack.io` (PM),
-`marcus.reed@protrack.io` (Designer), `lena.ortiz@protrack.io` (QA), `david.cho@protrack.io` (Admin).
+**Demo users** (all share the password `password`): `admin@protrack.io` (Admin),
+`pm@protrack.io` (Project Manager), `paginator@protrack.io` (Paginator), `qc@protrack.io` (QC),
+`qa@protrack.io` (QA).
 
 **Tests & checks:**
 

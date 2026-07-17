@@ -19,6 +19,7 @@ import com.protrack.shared.web.PageResponse;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -132,6 +133,28 @@ public class UserService {
 			throw selfDeactivation();
 		}
 		user.changeStatus("INACTIVE");
+	}
+
+	/**
+	 * Permanently delete a user (hard delete). Role assignments and refresh tokens cascade away; if the
+	 * user is still referenced by projects, history or other activity, the FK constraint blocks the
+	 * delete and we surface a clear 409 (deactivate is the safe alternative there).
+	 */
+	@Transactional
+	public void deleteUser(UUID adminId, UUID userId) {
+		User user = loadInOrg(adminId, userId);
+		if (user.getId().equals(adminId)) {
+			throw new ApiException(HttpStatus.CONFLICT, "CANNOT_DELETE_SELF",
+					"You cannot delete your own account.");
+		}
+		try {
+			userRepository.delete(user);
+			userRepository.flush(); // force the DELETE now so any FK violation surfaces here
+		} catch (DataIntegrityViolationException ex) {
+			throw new ApiException(HttpStatus.CONFLICT, "USER_HAS_REFERENCES",
+					"This user is linked to projects or activity and cannot be permanently deleted. "
+							+ "Deactivate them instead.");
+		}
 	}
 
 	@Transactional

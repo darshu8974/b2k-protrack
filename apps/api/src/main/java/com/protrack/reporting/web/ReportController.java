@@ -14,11 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Reports endpoints (API Specification §3.15): headline KPIs, monthly throughput, and workload by
- * imprint. Restricted to ADMIN / PM / QA (designers excluded); values are live org-scoped aggregates.
+ * imprint. Restricted to ADMIN / PROJECT_MANAGER / QC / QA (paginators excluded); values are live
+ * org-scoped aggregates.
  */
 @RestController
 @RequestMapping("/api/v1/reports")
-@PreAuthorize("hasAnyRole('ADMIN', 'PM', 'QA')")
+@PreAuthorize("hasAnyRole('ADMIN', 'PROJECT_MANAGER', 'QC', 'QA')")
 public class ReportController {
 
 	private final ReportService reportService;

@@ -8,12 +8,12 @@ import { useHasRole } from "../../../hooks/useHasRole";
 import type { AppError } from "../../../types/api";
 import { useUploadPdf } from "../hooks";
 
-/** IN_PRODUCTION: the designer uploads the production PDF, which advances the project to PDF_REVIEW. */
+/** IN_PRODUCTION: the paginator uploads the production PDF, which advances the project to PDF_REVIEW. */
 export function UploadPdfPanel({ projectId }: { projectId: string }) {
   const [file, setFile] = useState<File | null>(null);
   const [progress, setProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const canUpload = useHasRole("DESIGNER", "ADMIN");
+  const canUpload = useHasRole("PAGINATOR", "ADMIN");
   const upload = useUploadPdf(projectId);
 
   const submit = async () => {
@@ -48,10 +48,10 @@ export function UploadPdfPanel({ projectId }: { projectId: string }) {
       )}
 
       <Can
-        roles={["DESIGNER", "ADMIN"]}
+        roles={["PAGINATOR", "ADMIN"]}
         fallback={
           <Alert severity="info" variant="outlined">
-            The designer uploads the production PDF for this project.
+            The paginator uploads the production PDF for this project.
           </Alert>
         }
       >

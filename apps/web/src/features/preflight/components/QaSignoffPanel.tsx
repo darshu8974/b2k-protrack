@@ -9,7 +9,7 @@ import { IssuesTable } from "./IssuesTable";
 import { PreflightSummary } from "./PreflightSummary";
 import { SignoffForm } from "./SignoffForm";
 
-/** QA_SIGNOFF: preflight results, the issues triage table, and the e-signature form. */
+/** QA_SIGNOFF: preflight results, the QC-decided issues (read-only), and the QA e-signature form. */
 export function QaSignoffPanel({ projectId }: { projectId: string }) {
   const { data: preflight, isLoading, isError, error } = usePreflight(projectId);
   const { data: issues } = useIssues(projectId);
@@ -43,7 +43,7 @@ export function QaSignoffPanel({ projectId }: { projectId: string }) {
         <Typography variant="subtitle1" sx={{ mb: 1.5 }}>
           Issues
         </Typography>
-        <IssuesTable projectId={projectId} issues={issues ?? []} />
+        <IssuesTable projectId={projectId} issues={issues ?? []} canDecide={false} />
       </Card>
 
       <Can

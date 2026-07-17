@@ -36,11 +36,11 @@ function StatRow({ label, value }: { label: string; value?: string | number | nu
 /** COMPLETED: the sign-off certificate, approval history, and the deliverable package download. */
 export function CompletedPanel({ projectId }: { projectId: string }) {
   const queryClient = useQueryClient();
-  const canPackage = useHasRole("DESIGNER", "PM", "ADMIN");
+  const canPackage = useHasRole("PAGINATOR", "PROJECT_MANAGER", "ADMIN");
   const { data: preflight } = usePreflight(projectId);
   const { data: signoffs } = useSignoffs(projectId);
   const { data: approvals } = useApprovals(projectId);
-  // The package endpoints are Designer/PM/Admin only — don't query them for QA (avoids a 403).
+  // The package endpoints are Paginator/PM/Admin only — don't query them for QA (avoids a 403).
   const { data: pkg } = usePackage(projectId, canPackage);
   const { download, downloading } = useDownload();
 
@@ -93,10 +93,10 @@ export function CompletedPanel({ projectId }: { projectId: string }) {
           Download the assembled production package for this title.
         </Typography>
         <Can
-          roles={["DESIGNER", "PM", "ADMIN"]}
+          roles={["PAGINATOR", "PROJECT_MANAGER", "ADMIN"]}
           fallback={
             <Typography variant="body2" color="text.secondary">
-              The production package is available to the design and project-management team.
+              The production package is available to the pagination and project-management team.
             </Typography>
           }
         >

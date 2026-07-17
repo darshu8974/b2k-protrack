@@ -78,12 +78,12 @@ export const router = createBrowserRouter([
           { path: "health", element: <HealthPage /> },
           { path: "projects", element: <ProjectsListPage /> },
           {
-            element: <RoleRoute allow={["PM", "ADMIN"]} />,
+            element: <RoleRoute allow={["PROJECT_MANAGER", "ADMIN"]} />,
             children: [{ path: "projects/new", element: <CreateProjectPage /> }],
           },
           { path: "projects/:id", element: <ProjectDetailsPage /> },
           {
-            element: <RoleRoute allow={["ADMIN", "PM", "QA"]} />,
+            element: <RoleRoute allow={["ADMIN", "PROJECT_MANAGER", "QC", "QA"]} />,
             children: [{ path: "reports", element: <ReportsPage /> }],
           },
           {

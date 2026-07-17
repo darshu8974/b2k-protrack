@@ -37,7 +37,7 @@ public class DocumentController {
 	}
 
 	@PostMapping(path = "/projects/{projectId}/documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	@PreAuthorize("hasAnyRole('PM', 'DESIGNER', 'ADMIN')")
+	@PreAuthorize("hasAnyRole('PROJECT_MANAGER', 'PAGINATOR', 'ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
 	public DocumentResponse create(@PathVariable UUID projectId,
 			@RequestParam("docType") DocType docType,
@@ -47,7 +47,7 @@ public class DocumentController {
 	}
 
 	@PostMapping(path = "/projects/{projectId}/manuscript", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	@PreAuthorize("hasAnyRole('PM', 'ADMIN')")
+	@PreAuthorize("hasAnyRole('PROJECT_MANAGER', 'ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
 	public DocumentResponse uploadManuscript(@PathVariable UUID projectId,
 			@RequestParam(name = "title", required = false) String title,

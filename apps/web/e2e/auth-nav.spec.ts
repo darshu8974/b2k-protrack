@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 import { login, nav, NAV_MATRIX, PASSWORD, USERS, type Role } from "./helpers";
 
-const ROLES: Role[] = ["PM", "DESIGNER", "QA", "ADMIN"];
+const ROLES: Role[] = ["PROJECT_MANAGER", "PAGINATOR", "QC", "QA", "ADMIN"];
 
 test.describe("authentication & role-shaped navigation", () => {
   for (const role of ROLES) {
@@ -20,7 +20,7 @@ test.describe("authentication & role-shaped navigation", () => {
 
   test("rejects invalid credentials with an error alert", async ({ page }) => {
     await page.goto("/login");
-    await page.getByLabel(/work email/i).fill(USERS.PM.email);
+    await page.getByLabel(/work email/i).fill(USERS.PROJECT_MANAGER.email);
     await page.getByLabel(/password/i).fill("wrong-password");
     await page.getByRole("button", { name: /sign in/i }).click();
 
@@ -34,8 +34,9 @@ test.describe("authentication & role-shaped navigation", () => {
   });
 
   test("logout clears the session and returns to login", async ({ page }) => {
-    await login(page, "PM");
-    await page.getByRole("button", { name: /sign out/i }).click();
+    await login(page, "PROJECT_MANAGER");
+    await page.getByRole("button", { name: /account/i }).click();
+    await page.getByRole("menuitem", { name: /sign out/i }).click();
     await expect(page).toHaveURL(/\/login$/);
 
     // Session is gone: a protected route bounces back to login.
@@ -47,12 +48,12 @@ test.describe("authentication & role-shaped navigation", () => {
     await login(page, "QA");
     await page.reload();
     await expect(page.getByRole("heading", { name: /good morning/i })).toBeVisible();
-    await expect(nav(page).getByText("QA queue", { exact: true })).toBeVisible();
+    await expect(nav(page).getByText("Sign-off queue", { exact: true })).toBeVisible();
   });
 });
 
-test("login form prefills the PM demo account", async ({ page }) => {
+test("login form prefills the admin demo account", async ({ page }) => {
   await page.goto("/login");
-  await expect(page.getByLabel(/work email/i)).toHaveValue(USERS.PM.email);
+  await expect(page.getByLabel(/work email/i)).toHaveValue(USERS.ADMIN.email);
   await expect(page.getByLabel(/password/i)).toHaveValue(PASSWORD);
 });

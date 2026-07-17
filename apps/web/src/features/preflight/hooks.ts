@@ -10,7 +10,9 @@ import {
   listApprovals,
   listIssues,
   listSignoffs,
-  sendToQa,
+  qcApprove,
+  qcReject,
+  sendToQc,
   signOff,
   startPreflight,
   uploadProductionPdf,
@@ -123,16 +125,38 @@ export function useSignoff(projectId: string) {
   });
 }
 
-export function useSendToQa(projectId: string) {
+export function useSendToQc(projectId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => sendToQa(projectId),
+    mutationFn: () => sendToQc(projectId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.project(projectId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.projectTimeline(projectId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.projectActivity(projectId) });
     },
   });
+}
+
+/** QC → advance QC_REVIEW to QA sign-off (approve) or back to production (reject). */
+function useQcTransition(projectId: string, action: (projectId: string) => Promise<void>) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => action(projectId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.project(projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.projectTimeline(projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.projectActivity(projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.issues(projectId) });
+    },
+  });
+}
+
+export function useQcApprove(projectId: string) {
+  return useQcTransition(projectId, qcApprove);
+}
+
+export function useQcReject(projectId: string) {
+  return useQcTransition(projectId, qcReject);
 }
 
 function invalidateQa(queryClient: ReturnType<typeof useQueryClient>, projectId: string): void {

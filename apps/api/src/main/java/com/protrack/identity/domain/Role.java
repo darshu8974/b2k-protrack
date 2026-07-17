@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-/** One of the four fixed roles (ADMIN, PM, DESIGNER, QA). Reference data. */
+/** One of the five fixed roles (ADMIN, PROJECT_MANAGER, PAGINATOR, QC, QA). Reference data. */
 @Entity
 @Table(name = "roles")
 public class Role {

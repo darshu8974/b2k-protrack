@@ -40,7 +40,7 @@ public class FileVersionController {
 	}
 
 	@PostMapping(path = "/documents/{documentId}/versions", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	@PreAuthorize("hasAnyRole('PM', 'DESIGNER', 'ADMIN')")
+	@PreAuthorize("hasAnyRole('PROJECT_MANAGER', 'PAGINATOR', 'ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
 	public FileVersionResponse addVersion(@PathVariable UUID documentId,
 			@RequestParam("file") MultipartFile file, Principal principal) {
@@ -48,7 +48,7 @@ public class FileVersionController {
 	}
 
 	@PostMapping("/documents/{documentId}/versions/{versionId}:setCurrent")
-	@PreAuthorize("hasAnyRole('PM', 'ADMIN')")
+	@PreAuthorize("hasAnyRole('PROJECT_MANAGER', 'ADMIN')")
 	public DocumentResponse setCurrent(@PathVariable UUID documentId, @PathVariable UUID versionId,
 			Principal principal) {
 		return fileVersionService.setCurrent(currentUserId(principal), documentId, versionId);

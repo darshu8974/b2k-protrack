@@ -6,6 +6,7 @@ import {
   bulkUpdate,
   createUser,
   deactivateUser,
+  deleteUser,
   listRoles,
   listUsers,
   revokeRole,
@@ -53,6 +54,14 @@ export function useDeactivateUser() {
   const invalidate = useInvalidateUsers();
   return useMutation({
     mutationFn: (id: string) => deactivateUser(id),
+    onSuccess: invalidate,
+  });
+}
+
+export function useDeleteUser() {
+  const invalidate = useInvalidateUsers();
+  return useMutation({
+    mutationFn: (id: string) => deleteUser(id),
     onSuccess: invalidate,
   });
 }

@@ -58,9 +58,9 @@ export function ProjectDetailsPage() {
   const { data: activity } = useProjectActivity(id);
   const { data: stages } = useWorkflowStages();
 
-  // The production-package tab mirrors the backend RBAC (Designer/PM/Admin — QA excluded).
+  // The production-package tab mirrors the backend RBAC (Paginator/PM/Admin — QC & QA excluded).
   const canSeePackage = (user?.roles ?? []).some((role) =>
-    ["DESIGNER", "PM", "ADMIN"].includes(role),
+    ["PAGINATOR", "PROJECT_MANAGER", "ADMIN"].includes(role),
   );
   // If the active tab becomes unavailable (e.g. role change), fall back to a valid one.
   const activeTab = tab === "package" && !canSeePackage ? "overview" : tab;

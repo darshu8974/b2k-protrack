@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Client-facing preflight endpoints: the designer uploads the production PDF (auto-advancing to
- * PDF_REVIEW); QA/PM run preflight (async, 202); any member reads the latest result.
+ * Client-facing preflight endpoints: the paginator uploads the production PDF (auto-advancing to
+ * PDF_REVIEW); QC/PM run preflight (async, 202); any member reads the latest result.
  */
 @RestController
 @RequestMapping("/api/v1/projects/{projectId}")
@@ -42,7 +42,7 @@ public class PreflightController {
 	}
 
 	@PostMapping(path = "/pdf", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	@PreAuthorize("hasAnyRole('DESIGNER', 'ADMIN')")
+	@PreAuthorize("hasAnyRole('PAGINATOR', 'ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ProductionPdfResponse uploadPdf(@PathVariable UUID projectId,
 			@RequestParam(name = "title", required = false) String title,
@@ -51,7 +51,7 @@ public class PreflightController {
 	}
 
 	@PostMapping("/preflight")
-	@PreAuthorize("hasAnyRole('QA', 'PM', 'ADMIN')")
+	@PreAuthorize("hasAnyRole('QC', 'PROJECT_MANAGER', 'ADMIN')")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	public AiJobResponse start(@PathVariable UUID projectId, Principal principal) {
 		return preflightOrchestrator.startPreflight(currentUserId(principal), projectId);

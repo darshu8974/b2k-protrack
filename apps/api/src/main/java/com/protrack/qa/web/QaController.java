@@ -27,9 +27,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * The QA triage surface: list preflight issues, record per-issue and bulk decisions, and the formal
- * sign-off (with its approval history). Reads issues via the {@link PreflightFacade}; sign-off is the
- * atomic completion gate.
+ * The QC/QA triage surface: list preflight issues, record per-issue and bulk decisions (QC review of
+ * the paginator's work), and the formal QA sign-off (with its approval history). Reads issues via the
+ * {@link PreflightFacade}; QC approves/rejects issues, QA performs the atomic completion sign-off.
  */
 @RestController
 @RequestMapping("/api/v1")
@@ -47,7 +47,7 @@ public class QaController {
 	}
 
 	@GetMapping("/projects/{projectId}/issues")
-	@PreAuthorize("hasAnyRole('QA', 'PM', 'ADMIN')")
+	@PreAuthorize("hasAnyRole('QC', 'QA', 'PROJECT_MANAGER', 'ADMIN')")
 	public List<IssueResponse> issues(@PathVariable UUID projectId,
 			@RequestParam(name = "severity", required = false) String severity,
 			@RequestParam(name = "status", required = false) String status) {
@@ -56,7 +56,7 @@ public class QaController {
 	}
 
 	@PostMapping("/issues/{issueId}/decision")
-	@PreAuthorize("hasAnyRole('QA', 'ADMIN')")
+	@PreAuthorize("hasAnyRole('QC', 'ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
 	public IssueDecisionResponse decide(@PathVariable UUID issueId,
 			@Valid @RequestBody IssueDecisionRequest request, Principal principal) {
@@ -65,7 +65,7 @@ public class QaController {
 	}
 
 	@PostMapping("/issues:bulk-decision")
-	@PreAuthorize("hasAnyRole('QA', 'ADMIN')")
+	@PreAuthorize("hasAnyRole('QC', 'ADMIN')")
 	public BulkDecisionResponse bulkDecide(@Valid @RequestBody BulkDecisionRequest request,
 			Principal principal) {
 		return issueDecisionService.bulkDecide(

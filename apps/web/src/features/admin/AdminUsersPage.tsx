@@ -1,5 +1,6 @@
 import AddIcon from "@mui/icons-material/Add";
 import BlockIcon from "@mui/icons-material/Block";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import {
@@ -10,6 +11,11 @@ import {
   Card,
   Checkbox,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   IconButton,
   Menu,
   MenuItem,
@@ -37,6 +43,7 @@ import {
   useAssignRole,
   useBulkUpdate,
   useDeactivateUser,
+  useDeleteUser,
   useRevokeRole,
   useRoles,
 } from "./hooks";
@@ -63,6 +70,7 @@ export function AdminUsersPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editUser, setEditUser] = useState<AdminUser | null>(null);
   const [roleMenu, setRoleMenu] = useState<{ anchor: HTMLElement; user: AdminUser } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null);
   const [banner, setBanner] = useState<string | null>(null);
 
   const { data: roles = [] } = useRoles();
@@ -77,6 +85,7 @@ export function AdminUsersPage() {
   const assignRole = useAssignRole();
   const revokeRole = useRevokeRole();
   const deactivate = useDeactivateUser();
+  const deleteUser = useDeleteUser();
   const bulk = useBulkUpdate();
 
   const users = data?.content ?? [];
@@ -109,6 +118,22 @@ export function AdminUsersPage() {
   function openEdit(u: AdminUser) {
     setEditUser(u);
     setDialogOpen(true);
+  }
+
+  function confirmDelete() {
+    if (!deleteTarget) return;
+    setBanner(null);
+    const id = deleteTarget.id;
+    deleteUser.mutate(id, {
+      onSuccess: () => {
+        setSelected((s) => s.filter((x) => x !== id));
+        setDeleteTarget(null);
+      },
+      onError: (e) => {
+        setDeleteTarget(null);
+        onError(e);
+      },
+    });
   }
 
   return (
@@ -318,6 +343,22 @@ export function AdminUsersPage() {
                             </IconButton>
                           </span>
                         </Tooltip>
+                        <Tooltip title={isSelf ? "You cannot delete yourself" : "Delete permanently"}>
+                          <span>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              aria-label={`Delete ${u.fullName}`}
+                              disabled={isSelf}
+                              onClick={() => {
+                                setBanner(null);
+                                setDeleteTarget(u);
+                              }}
+                            >
+                              <DeleteForeverIcon fontSize="small" />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
                       </TableCell>
                     </TableRow>
                   );
@@ -371,6 +412,29 @@ export function AdminUsersPage() {
               </MenuItem>
             ))}
       </Menu>
+
+      {/* Permanent-delete confirmation */}
+      <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>Delete user permanently?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            This permanently deletes <strong>{deleteTarget?.fullName}</strong> ({deleteTarget?.email}).
+            This cannot be undone. If the user is linked to projects or activity, deactivate them
+            instead.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteTarget(null)}>Cancel</Button>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={confirmDelete}
+            disabled={deleteUser.isPending}
+          >
+            {deleteUser.isPending ? "Deleting…" : "Delete"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <UserFormDialog
         open={dialogOpen}

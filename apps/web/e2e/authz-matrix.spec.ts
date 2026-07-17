@@ -12,7 +12,7 @@ const ADMIN_ROUTES = [
   { path: "/admin/audit", heading: "Audit log" },
 ];
 
-const NON_ADMIN: Role[] = ["PM", "DESIGNER", "QA"];
+const NON_ADMIN: Role[] = ["PROJECT_MANAGER", "PAGINATOR", "QC", "QA"];
 
 test.describe("admin route authorization", () => {
   for (const route of ADMIN_ROUTES) {

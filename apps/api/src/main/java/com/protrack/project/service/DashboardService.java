@@ -33,7 +33,8 @@ public class DashboardService {
 
 	/** Canonical pipeline order, so stage counts are always returned in sequence. */
 	private static final List<String> STAGE_ORDER = List.of(
-			"INTAKE", "AI_ANALYSIS", "DESIGN_PREP", "IN_PRODUCTION", "PDF_REVIEW", "QA_SIGNOFF", "COMPLETED");
+			"INTAKE", "AI_ANALYSIS", "DESIGN_PREP", "IN_PRODUCTION", "PDF_REVIEW", "QC_REVIEW",
+			"QA_SIGNOFF", "COMPLETED");
 	private static final int MY_PROJECTS_LIMIT = 12;
 
 	private final ProjectRepository projectRepository;

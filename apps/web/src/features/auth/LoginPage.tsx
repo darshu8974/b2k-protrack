@@ -42,7 +42,7 @@ export function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "priya.anand@protrack.io", password: "password" },
+    defaultValues: { email: "admin@protrack.io", password: "password" },
   });
 
   // Authenticated users shouldn't see the login page.
@@ -195,8 +195,8 @@ export function LoginPage() {
             }}
           >
             <Typography variant="caption" color="text.secondary">
-              <strong>Demo</strong> — credentials are pre-filled. Sign in, then switch roles (PM /
-              Designer / QA / Admin) from the sidebar.
+              <strong>Demo</strong> — credentials are pre-filled. Sign in, then switch roles (Project
+              Manager / Paginator / QC / QA / Admin) from the sidebar.
             </Typography>
           </Box>
         </Box>

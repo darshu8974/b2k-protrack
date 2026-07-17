@@ -11,8 +11,20 @@ class StageTransitionTest {
 	void allowsLegalForwardTransition() {
 		var transition = StageTransition.find("INTAKE", "AI_ANALYSIS");
 		assertThat(transition).isPresent();
-		assertThat(transition.get().roles()).contains("PM");
+		assertThat(transition.get().roles()).contains("PROJECT_MANAGER");
 		assertThat(transition.get().approvalGate()).isFalse();
+	}
+
+	@Test
+	void qcApprovalMovesPdfReviewThroughQcToSignoff() {
+		var toQc = StageTransition.find("PDF_REVIEW", "QC_REVIEW");
+		assertThat(toQc).isPresent();
+		assertThat(toQc.get().roles()).contains("QC");
+
+		var qcApprove = StageTransition.find("QC_REVIEW", "QA_SIGNOFF");
+		assertThat(qcApprove).isPresent();
+		assertThat(qcApprove.get().approvalGate()).isTrue();
+		assertThat(qcApprove.get().roles()).contains("QC");
 	}
 
 	@Test

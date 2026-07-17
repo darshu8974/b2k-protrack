@@ -9,13 +9,13 @@ import { useSse } from "../../../hooks/useSse";
 import type { AppError } from "../../../types/api";
 import type { AiJob } from "../../../types/analysis";
 import { useAiJob } from "../../analysis/hooks";
-import { usePreflight, useSendToQa, useStartPreflight } from "../hooks";
+import { usePreflight, useSendToQc, useStartPreflight } from "../hooks";
 import { PreflightChecklist } from "./PreflightChecklist";
 import { PreflightSummary } from "./PreflightSummary";
 
 const ACTIVE = new Set(["QUEUED", "RUNNING"]);
 
-/** PDF_REVIEW: run preflight (animated), show results, and send the project to QA sign-off. */
+/** PDF_REVIEW: run preflight (animated), show results, and send the project to QC review. */
 export function PreflightPanel({ projectId }: { projectId: string }) {
   const queryClient = useQueryClient();
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
@@ -24,7 +24,7 @@ export function PreflightPanel({ projectId }: { projectId: string }) {
   const { data: preflight } = usePreflight(projectId);
   const { data: job } = useAiJob(activeJobId);
   const startPreflight = useStartPreflight(projectId);
-  const sendToQa = useSendToQa(projectId);
+  const sendToQc = useSendToQc(projectId);
 
   const jobActive = job != null && ACTIVE.has(job.status);
   const jobFailed = job?.status === "FAILED";
@@ -65,9 +65,9 @@ export function PreflightPanel({ projectId }: { projectId: string }) {
   const advance = async () => {
     setError(null);
     try {
-      await sendToQa.mutateAsync();
+      await sendToQc.mutateAsync();
     } catch (err) {
-      setError((err as AppError).message ?? "Could not send to QA.");
+      setError((err as AppError).message ?? "Could not send to QC.");
     }
   };
 
@@ -85,7 +85,7 @@ export function PreflightPanel({ projectId }: { projectId: string }) {
           error={jobFailed ? (job?.errorMessage ?? "Preflight failed") : null}
         />
         {jobFailed && (
-          <Can roles={["QA", "PM", "ADMIN"]}>
+          <Can roles={["QC", "PROJECT_MANAGER", "ADMIN"]}>
             <Button sx={{ mt: 2 }} variant="contained" onClick={run}>
               Try again
             </Button>
@@ -111,10 +111,10 @@ export function PreflightPanel({ projectId }: { projectId: string }) {
           </Alert>
         )}
         <Can
-          roles={["QA", "PM", "ADMIN"]}
+          roles={["QC", "PROJECT_MANAGER", "ADMIN"]}
           fallback={
             <Typography variant="caption" color="text.secondary">
-              QA or a project manager can run preflight.
+              QC or a project manager can run preflight.
             </Typography>
           }
         >
@@ -139,17 +139,17 @@ export function PreflightPanel({ projectId }: { projectId: string }) {
           alignItems={{ sm: "center" }}
         >
           <Typography variant="body2" color="text.secondary">
-            Review the results, then send the project to QA sign-off.
+            Review the results, then send the project to QC review.
           </Typography>
           <Stack direction="row" spacing={1}>
-            <Can roles={["QA", "PM", "ADMIN"]}>
+            <Can roles={["QC", "PROJECT_MANAGER", "ADMIN"]}>
               <Button variant="outlined" onClick={run} disabled={startPreflight.isPending}>
                 Re-run
               </Button>
             </Can>
-            <Can roles={["QA", "PM", "ADMIN"]}>
-              <Button variant="contained" onClick={advance} disabled={sendToQa.isPending}>
-                {sendToQa.isPending ? "Sending…" : "Send to QA"}
+            <Can roles={["QC", "PROJECT_MANAGER", "ADMIN"]}>
+              <Button variant="contained" onClick={advance} disabled={sendToQc.isPending}>
+                {sendToQc.isPending ? "Sending…" : "Send to QC"}
               </Button>
             </Can>
           </Stack>

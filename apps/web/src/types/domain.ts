@@ -1,5 +1,5 @@
-/** The four fixed roles (sample user names are placeholder data only). */
-export type Role = "ADMIN" | "PM" | "DESIGNER" | "QA";
+/** The five fixed roles in the Sprint-8 hierarchy. */
+export type Role = "ADMIN" | "PROJECT_MANAGER" | "PAGINATOR" | "QC" | "QA";
 
 /** Authenticated user summary, sourced from /me in Sprint 1. */
 export interface UserSummary {

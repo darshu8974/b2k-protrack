@@ -1,7 +1,7 @@
 import AddIcon from "@mui/icons-material/Add";
+import SearchOffIcon from "@mui/icons-material/SearchOff";
 import {
   Alert,
-  Box,
   Button,
   Card,
   Chip,
@@ -24,6 +24,7 @@ import { useNavigate } from "react-router-dom";
 
 import { paths } from "../../../app/router/paths";
 import { Can } from "../../../components/auth/Can";
+import { EmptyState } from "../../../components/feedback/EmptyState";
 import { LoadingState } from "../../../components/feedback/LoadingState";
 import { useDebounce } from "../../../hooks/useDebounce";
 import {
@@ -82,7 +83,7 @@ export function ProjectsListPage() {
     <Stack spacing={2}>
       <Stack direction="row" alignItems="center" justifyContent="space-between">
         <Typography variant="h4">Projects</Typography>
-        <Can roles={["PM", "ADMIN"]}>
+        <Can roles={["PROJECT_MANAGER", "ADMIN"]}>
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate(paths.projectNew)}>
             New project
           </Button>
@@ -214,8 +215,12 @@ export function ProjectsListPage() {
               <TableBody>
                 {data.content.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6}>
-                      <Box sx={{ p: 2, color: "text.secondary" }}>No projects match your filters.</Box>
+                    <TableCell colSpan={6} sx={{ borderBottom: 0 }}>
+                      <EmptyState
+                        icon={<SearchOffIcon />}
+                        title="No projects found"
+                        message="No projects match your current filters. Try clearing them or create a new project."
+                      />
                     </TableCell>
                   </TableRow>
                 )}

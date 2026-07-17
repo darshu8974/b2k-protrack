@@ -61,7 +61,7 @@ class AuditServiceCsvTest {
 		when(auditEventRepository.findAll(any(Specification.class), any(Pageable.class)))
 				.thenReturn(page);
 		when(identityFacade.findBriefs(any())).thenReturn(Map.of(actorId,
-				new UserBrief(actorId, "Priya Anand", "priya@protrack.io", "PA", "#000")));
+				new UserBrief(actorId, "Admin User", "admin@protrack.io", "AU", "#000")));
 
 		String csv = new String(service.exportCsv(admin, null, null), StandardCharsets.UTF_8);
 		List<String> lines = csv.lines().toList();
@@ -70,7 +70,7 @@ class AuditServiceCsvTest {
 				.isEqualTo("Time,Event,Entity Type,Entity Id,Summary,Actor,Actor Type,Project Id,Correlation Id");
 		assertThat(lines.get(1)).contains("PROJECT_CREATED");
 		assertThat(lines.get(1)).contains("\"Created, \"\"Quantum\"\"\""); // RFC-4180 escaping
-		assertThat(lines.get(1)).contains("Priya Anand");
+		assertThat(lines.get(1)).contains("Admin User");
 		assertThat(lines).hasSize(2);
 	}
 

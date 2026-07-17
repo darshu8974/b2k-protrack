@@ -39,20 +39,20 @@ public class PackageController {
 	}
 
 	@GetMapping
-	@PreAuthorize("hasAnyRole('DESIGNER', 'PM', 'ADMIN')")
+	@PreAuthorize("hasAnyRole('PAGINATOR', 'PROJECT_MANAGER', 'ADMIN')")
 	public PackageResponse get(@PathVariable UUID projectId, Principal principal) {
 		return assemblyService.get(currentUserId(principal), projectId);
 	}
 
 	@PostMapping
-	@PreAuthorize("hasAnyRole('PM', 'ADMIN')")
+	@PreAuthorize("hasAnyRole('PROJECT_MANAGER', 'ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
 	public PackageResponse assemble(@PathVariable UUID projectId, Principal principal) {
 		return assemblyService.assemble(currentUserId(principal), projectId);
 	}
 
 	@PostMapping("/items")
-	@PreAuthorize("hasAnyRole('PM', 'ADMIN')")
+	@PreAuthorize("hasAnyRole('PROJECT_MANAGER', 'ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
 	public PackageResponse addItem(@PathVariable UUID projectId,
 			@Valid @RequestBody AddPackageItemRequest request, Principal principal) {
@@ -60,7 +60,7 @@ public class PackageController {
 	}
 
 	@DeleteMapping("/items/{itemId}")
-	@PreAuthorize("hasAnyRole('PM', 'ADMIN')")
+	@PreAuthorize("hasAnyRole('PROJECT_MANAGER', 'ADMIN')")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void removeItem(@PathVariable UUID projectId, @PathVariable UUID itemId,
 			Principal principal) {
@@ -68,7 +68,7 @@ public class PackageController {
 	}
 
 	@GetMapping("/download")
-	@PreAuthorize("hasAnyRole('DESIGNER', 'PM', 'ADMIN')")
+	@PreAuthorize("hasAnyRole('PAGINATOR', 'PROJECT_MANAGER', 'ADMIN')")
 	public ResponseEntity<StreamingResponseBody> download(@PathVariable UUID projectId,
 			Principal principal) {
 		ZipManifest manifest = downloadService.prepare(currentUserId(principal), projectId);

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { Role } from "../types/domain";
 import { navConfig } from "./navConfig";
 
-const ALL_ROLES: Role[] = ["ADMIN", "PM", "DESIGNER", "QA"];
+const ALL_ROLES: Role[] = ["ADMIN", "PROJECT_MANAGER", "PAGINATOR", "QC", "QA"];
 
 function labels(role: Role): string[] {
   return navConfig[role].flatMap((section) => section.items.map((item) => item.label));
@@ -22,9 +22,10 @@ describe("role-shaped navigation", () => {
     }
   });
 
-  it("excludes Reports from designers but includes it for PM/QA/ADMIN", () => {
-    expect(labels("DESIGNER")).not.toContain("Reports");
-    expect(labels("PM")).toContain("Reports");
+  it("excludes Reports from paginators but includes it for PM/QC/QA/ADMIN", () => {
+    expect(labels("PAGINATOR")).not.toContain("Reports");
+    expect(labels("PROJECT_MANAGER")).toContain("Reports");
+    expect(labels("QC")).toContain("Reports");
     expect(labels("QA")).toContain("Reports");
     expect(labels("ADMIN")).toContain("Reports");
   });
@@ -36,7 +37,7 @@ describe("role-shaped navigation", () => {
     expect(usersItem?.path).toBe("/admin/users");
     expect(auditItem?.path).toBe("/admin/audit");
 
-    expect(labels("PM")).not.toContain("Users & roles");
-    expect(labels("PM")).not.toContain("Audit log");
+    expect(labels("PROJECT_MANAGER")).not.toContain("Users & roles");
+    expect(labels("PROJECT_MANAGER")).not.toContain("Audit log");
   });
 });

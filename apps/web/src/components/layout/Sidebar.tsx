@@ -11,6 +11,7 @@ import RateReviewOutlinedIcon from "@mui/icons-material/RateReviewOutlined";
 import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
 import {
   Box,
+  Chip,
   Drawer,
   List,
   ListItemButton,
@@ -22,12 +23,25 @@ import {
 import type { ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { tokens } from "../../app/theme/palette";
+import { paths } from "../../app/router/paths";
 import { useAuth } from "../../features/auth/useAuth";
 import { navConfig } from "../../lib/navConfig";
 import { RoleSwitcher } from "./RoleSwitcher";
 
 const DRAWER_WIDTH = 248;
+
+/** Dark-rail palette: the sidebar is the app's dark accent against the light workspace. */
+const RAIL = {
+  bg: "linear-gradient(180deg, #16294A 0%, #101A2E 100%)",
+  text: "rgba(255,255,255,0.92)",
+  muted: "rgba(255,255,255,0.52)",
+  icon: "rgba(255,255,255,0.70)",
+  hover: "rgba(255,255,255,0.07)",
+  selBg: "rgba(96,165,250,0.18)",
+  selText: "#FFFFFF",
+  selIcon: "#7FB2FF",
+  border: "rgba(255,255,255,0.08)",
+};
 
 const ICONS: Record<string, ReactNode> = {
   dashboard: <GridViewOutlinedIcon fontSize="small" />,
@@ -43,13 +57,13 @@ const ICONS: Record<string, ReactNode> = {
   audit: <HistoryOutlinedIcon fontSize="small" />,
 };
 
-/** Fixed left navigation; items are shaped by the active role. */
+/** Fixed left navigation (dark rail); items are shaped by the active role. */
 export function Sidebar() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const role = user?.roles[0] ?? "PM";
+  const role = user?.roles[0] ?? "PROJECT_MANAGER";
   const sections = navConfig[role];
 
   return (
@@ -61,8 +75,9 @@ export function Sidebar() {
         "& .MuiDrawer-paper": {
           width: DRAWER_WIDTH,
           boxSizing: "border-box",
-          borderRight: 1,
-          borderColor: "divider",
+          border: "none",
+          background: RAIL.bg,
+          color: RAIL.text,
         },
       }}
     >
@@ -85,12 +100,12 @@ export function Sidebar() {
           P
         </Box>
         <Box>
-          <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.1 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.1, color: RAIL.text }}>
             Protrack
           </Typography>
           <Typography
             variant="caption"
-            sx={{ color: "text.secondary", letterSpacing: 0.6, fontSize: 9.5 }}
+            sx={{ color: RAIL.muted, letterSpacing: 0.6, fontSize: 9.5 }}
           >
             PUBLISHING OS
           </Typography>
@@ -104,7 +119,7 @@ export function Sidebar() {
               variant="caption"
               sx={{
                 px: 1.5,
-                color: "text.secondary",
+                color: RAIL.muted,
                 fontWeight: 600,
                 letterSpacing: 0.6,
                 fontSize: 10.5,
@@ -114,27 +129,35 @@ export function Sidebar() {
             </Typography>
             <List dense sx={{ mt: 0.5 }}>
               {section.items.map((item, index) => {
-                const selected = pathname === item.path;
+                // Items still pointing at the Sprint-0 placeholder aren't wired to a real
+                // destination yet — show them as upcoming rather than as dead links.
+                const soon = item.path === paths.health;
+                const selected = !soon && pathname === item.path;
                 return (
                   <ListItemButton
                     key={`${item.label}-${index}`}
                     selected={selected}
-                    onClick={() => navigate(item.path)}
+                    disabled={soon}
+                    onClick={() => {
+                      if (!soon) navigate(item.path);
+                    }}
                     sx={{
                       borderRadius: 1.5,
                       mx: 0.5,
                       py: 0.75,
+                      color: RAIL.text,
+                      "& .MuiListItemIcon-root": { color: RAIL.icon },
+                      "&:hover": { bgcolor: RAIL.hover },
+                      "&.Mui-disabled": { opacity: 0.5 },
                       "&.Mui-selected": {
-                        bgcolor: tokens.primaryTint,
-                        color: "primary.main",
-                        "& .MuiListItemIcon-root": { color: "primary.main" },
-                        "&:hover": { bgcolor: tokens.primaryTint },
+                        bgcolor: RAIL.selBg,
+                        color: RAIL.selText,
+                        "& .MuiListItemIcon-root": { color: RAIL.selIcon },
+                        "&:hover": { bgcolor: RAIL.selBg },
                       },
                     }}
                   >
-                    <ListItemIcon sx={{ minWidth: 34, color: "text.secondary" }}>
-                      {ICONS[item.icon]}
-                    </ListItemIcon>
+                    <ListItemIcon sx={{ minWidth: 34 }}>{ICONS[item.icon]}</ListItemIcon>
                     <ListItemText
                       primary={item.label}
                       primaryTypographyProps={{
@@ -142,6 +165,21 @@ export function Sidebar() {
                         fontWeight: selected ? 600 : 500,
                       }}
                     />
+                    {soon && (
+                      <Chip
+                        label="Soon"
+                        size="small"
+                        sx={{
+                          height: 18,
+                          fontSize: 9.5,
+                          fontWeight: 700,
+                          letterSpacing: 0.3,
+                          bgcolor: "rgba(255,255,255,0.10)",
+                          color: RAIL.muted,
+                          "& .MuiChip-label": { px: 0.75 },
+                        }}
+                      />
+                    )}
                   </ListItemButton>
                 );
               })}
@@ -150,7 +188,7 @@ export function Sidebar() {
         ))}
       </Box>
 
-      <Box sx={{ p: 1, borderTop: 1, borderColor: "divider" }}>
+      <Box sx={{ p: 1, borderTop: `1px solid ${RAIL.border}` }}>
         <RoleSwitcher />
       </Box>
     </Drawer>
