@@ -16,7 +16,9 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-import { LoadingState } from "../../components/feedback/LoadingState";
+import { EmptyState } from "../../components/feedback/EmptyState";
+import { ErrorState } from "../../components/feedback/ErrorState";
+import { TableSkeleton } from "../../components/feedback/Skeletons";
 import { useDownload } from "../../hooks/useDownload";
 import { auditEventLabel } from "../../lib/labels";
 import { useAuditEvents } from "../audit/hooks";
@@ -29,7 +31,7 @@ export function AuditLogPage() {
   const [eventType, setEventType] = useState("");
   const { download, downloading } = useDownload();
 
-  const { data, isLoading } = useAuditEvents({
+  const { data, isLoading, isError } = useAuditEvents({
     page,
     size,
     sort: "createdAt,desc",
@@ -77,7 +79,8 @@ export function AuditLogPage() {
       </Card>
 
       <Card>
-        {isLoading && <LoadingState />}
+        {isError && <ErrorState message="Unable to load the audit log." />}
+        {isLoading && <TableSkeleton columns={4} />}
         {data && (
           <>
             <Table size="small">
@@ -90,6 +93,16 @@ export function AuditLogPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
+                {data.content.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4} sx={{ borderBottom: 0 }}>
+                      <EmptyState
+                        title="No activity yet"
+                        message="No audit events match your current filters."
+                      />
+                    </TableCell>
+                  </TableRow>
+                )}
                 {data.content.map((entry) => (
                   <TableRow key={entry.id}>
                     <TableCell>{new Date(entry.createdAt).toLocaleString()}</TableCell>

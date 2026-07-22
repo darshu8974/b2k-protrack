@@ -1,17 +1,10 @@
-import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
-import BrushOutlinedIcon from "@mui/icons-material/BrushOutlined";
-import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import GridViewOutlinedIcon from "@mui/icons-material/GridViewOutlined";
-import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
 import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
 import ManageAccountsOutlinedIcon from "@mui/icons-material/ManageAccountsOutlined";
-import RateReviewOutlinedIcon from "@mui/icons-material/RateReviewOutlined";
-import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
 import {
   Box,
-  Chip,
   Drawer,
   List,
   ListItemButton,
@@ -23,7 +16,6 @@ import {
 import type { ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { paths } from "../../app/router/paths";
 import { useAuth } from "../../features/auth/useAuth";
 import { navConfig } from "../../lib/navConfig";
 import { RoleSwitcher } from "./RoleSwitcher";
@@ -46,13 +38,7 @@ const RAIL = {
 const ICONS: Record<string, ReactNode> = {
   dashboard: <GridViewOutlinedIcon fontSize="small" />,
   folder: <FolderOutlinedIcon fontSize="small" />,
-  review: <RateReviewOutlinedIcon fontSize="small" />,
-  team: <GroupOutlinedIcon fontSize="small" />,
-  assistant: <AutoAwesomeOutlinedIcon fontSize="small" />,
   reports: <InsightsOutlinedIcon fontSize="small" />,
-  tasks: <TaskAltOutlinedIcon fontSize="small" />,
-  production: <BrushOutlinedIcon fontSize="small" />,
-  qa: <FactCheckOutlinedIcon fontSize="small" />,
   users: <ManageAccountsOutlinedIcon fontSize="small" />,
   audit: <HistoryOutlinedIcon fontSize="small" />,
 };
@@ -129,18 +115,12 @@ export function Sidebar() {
             </Typography>
             <List dense sx={{ mt: 0.5 }}>
               {section.items.map((item, index) => {
-                // Items still pointing at the Sprint-0 placeholder aren't wired to a real
-                // destination yet — show them as upcoming rather than as dead links.
-                const soon = item.path === paths.health;
-                const selected = !soon && pathname === item.path;
+                const selected = pathname === item.path;
                 return (
                   <ListItemButton
                     key={`${item.label}-${index}`}
                     selected={selected}
-                    disabled={soon}
-                    onClick={() => {
-                      if (!soon) navigate(item.path);
-                    }}
+                    onClick={() => navigate(item.path)}
                     sx={{
                       borderRadius: 1.5,
                       mx: 0.5,
@@ -148,7 +128,6 @@ export function Sidebar() {
                       color: RAIL.text,
                       "& .MuiListItemIcon-root": { color: RAIL.icon },
                       "&:hover": { bgcolor: RAIL.hover },
-                      "&.Mui-disabled": { opacity: 0.5 },
                       "&.Mui-selected": {
                         bgcolor: RAIL.selBg,
                         color: RAIL.selText,
@@ -165,21 +144,6 @@ export function Sidebar() {
                         fontWeight: selected ? 600 : 500,
                       }}
                     />
-                    {soon && (
-                      <Chip
-                        label="Soon"
-                        size="small"
-                        sx={{
-                          height: 18,
-                          fontSize: 9.5,
-                          fontWeight: 700,
-                          letterSpacing: 0.3,
-                          bgcolor: "rgba(255,255,255,0.10)",
-                          color: RAIL.muted,
-                          "& .MuiChip-label": { px: 0.75 },
-                        }}
-                      />
-                    )}
                   </ListItemButton>
                 );
               })}

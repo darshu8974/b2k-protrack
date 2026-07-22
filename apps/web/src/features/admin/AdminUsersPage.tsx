@@ -4,7 +4,6 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import {
-  Alert,
   Avatar,
   Box,
   Button,
@@ -32,8 +31,10 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
+import { EmptyState } from "../../components/feedback/EmptyState";
 import { ErrorState } from "../../components/feedback/ErrorState";
-import { LoadingState } from "../../components/feedback/LoadingState";
+import { TableSkeleton } from "../../components/feedback/Skeletons";
+import { useToast } from "../../components/feedback/ToastProvider";
 import { useDebounce } from "../../hooks/useDebounce";
 import type { AppError } from "../../types/api";
 import { useAuth } from "../auth/useAuth";
@@ -71,7 +72,7 @@ export function AdminUsersPage() {
   const [editUser, setEditUser] = useState<AdminUser | null>(null);
   const [roleMenu, setRoleMenu] = useState<{ anchor: HTMLElement; user: AdminUser } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null);
-  const [banner, setBanner] = useState<string | null>(null);
+  const toast = useToast();
 
   const { data: roles = [] } = useRoles();
   const { data, isLoading, isError } = useAdminUsers({
@@ -89,22 +90,23 @@ export function AdminUsersPage() {
   const bulk = useBulkUpdate();
 
   const users = data?.content ?? [];
-  const onError = (e: unknown) => setBanner((e as AppError)?.message ?? "Action failed.");
+  const onError = (e: unknown) => toast.error((e as AppError)?.message ?? "Action failed.");
 
   function toggle(id: string) {
     setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
   }
 
   function runBulk(action: "ACTIVATE" | "DEACTIVATE") {
-    setBanner(null);
     bulk.mutate(
       { action, userIds: selected },
       {
         onSuccess: (res) => {
           setSelected([]);
-          if (res.skipped > 0) {
-            setBanner(`${res.updated} updated, ${res.skipped} skipped (e.g. your own account).`);
-          }
+          toast.success(
+            res.skipped > 0
+              ? `${res.updated} updated, ${res.skipped} skipped (e.g. your own account).`
+              : `${res.updated} user${res.updated === 1 ? "" : "s"} updated.`,
+          );
         },
         onError,
       },
@@ -122,12 +124,13 @@ export function AdminUsersPage() {
 
   function confirmDelete() {
     if (!deleteTarget) return;
-    setBanner(null);
     const id = deleteTarget.id;
+    const name = deleteTarget.fullName;
     deleteUser.mutate(id, {
       onSuccess: () => {
         setSelected((s) => s.filter((x) => x !== id));
         setDeleteTarget(null);
+        toast.success(`${name} was deleted.`);
       },
       onError: (e) => {
         setDeleteTarget(null);
@@ -144,12 +147,6 @@ export function AdminUsersPage() {
           New user
         </Button>
       </Stack>
-
-      {banner && (
-        <Alert severity="info" onClose={() => setBanner(null)}>
-          {banner}
-        </Alert>
-      )}
 
       {/* Filters */}
       <Card sx={{ p: 2 }}>
@@ -230,7 +227,7 @@ export function AdminUsersPage() {
         {isError ? (
           <ErrorState message="Unable to load users." />
         ) : isLoading ? (
-          <LoadingState />
+          <TableSkeleton columns={5} />
         ) : (
           <>
             <Table size="small">
@@ -285,10 +282,14 @@ export function AdminUsersPage() {
                               size="small"
                               onDelete={
                                 u.roles.length > 1
-                                  ? () => {
-                                      setBanner(null);
-                                      revokeRole.mutate({ id: u.id, roleId: r.id }, { onError });
-                                    }
+                                  ? () =>
+                                      revokeRole.mutate(
+                                        { id: u.id, roleId: r.id },
+                                        {
+                                          onSuccess: () => toast.success(`Removed ${r.name} from ${u.fullName}.`),
+                                          onError,
+                                        },
+                                      )
                                   : undefined
                               }
                             />
@@ -334,10 +335,12 @@ export function AdminUsersPage() {
                               size="small"
                               aria-label={`Deactivate ${u.fullName}`}
                               disabled={isSelf || u.status === "INACTIVE"}
-                              onClick={() => {
-                                setBanner(null);
-                                deactivate.mutate(u.id, { onError });
-                              }}
+                              onClick={() =>
+                                deactivate.mutate(u.id, {
+                                  onSuccess: () => toast.success(`${u.fullName} was deactivated.`),
+                                  onError,
+                                })
+                              }
                             >
                               <BlockIcon fontSize="small" />
                             </IconButton>
@@ -350,10 +353,7 @@ export function AdminUsersPage() {
                               color="error"
                               aria-label={`Delete ${u.fullName}`}
                               disabled={isSelf}
-                              onClick={() => {
-                                setBanner(null);
-                                setDeleteTarget(u);
-                              }}
+                              onClick={() => setDeleteTarget(u)}
                             >
                               <DeleteForeverIcon fontSize="small" />
                             </IconButton>
@@ -365,14 +365,11 @@ export function AdminUsersPage() {
                 })}
                 {users.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6}>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ py: 2, textAlign: "center" }}
-                      >
-                        No users match these filters.
-                      </Typography>
+                    <TableCell colSpan={6} sx={{ borderBottom: 0 }}>
+                      <EmptyState
+                        title="No users found"
+                        message="No users match these filters. Try clearing them or invite a new user."
+                      />
                     </TableCell>
                   </TableRow>
                 )}
@@ -403,8 +400,14 @@ export function AdminUsersPage() {
               <MenuItem
                 key={r.id}
                 onClick={() => {
-                  setBanner(null);
-                  assignRole.mutate({ id: roleMenu.user.id, roleId: r.id }, { onError });
+                  const target = roleMenu.user;
+                  assignRole.mutate(
+                    { id: target.id, roleId: r.id },
+                    {
+                      onSuccess: () => toast.success(`Added ${r.name} to ${target.fullName}.`),
+                      onError,
+                    },
+                  );
                   setRoleMenu(null);
                 }}
               >

@@ -12,9 +12,9 @@ import { paths } from "../../app/router/paths";
 import { tokens } from "../../app/theme/palette";
 import { Can } from "../../components/auth/Can";
 import { ProjectsTable } from "../../components/data/ProjectsTable";
+import { DashboardSkeleton } from "../../components/feedback/Skeletons";
 import { EmptyState } from "../../components/feedback/EmptyState";
 import { ErrorState } from "../../components/feedback/ErrorState";
-import { LoadingState } from "../../components/feedback/LoadingState";
 import { STAGE_LABEL, STATUS_LABEL } from "../../lib/labels";
 import type { AppError } from "../../types/api";
 import type { ProjectStatus, Stage } from "../../types/project";
@@ -240,7 +240,7 @@ export function DashboardPage() {
   const firstName = user?.fullName?.split(" ")[0] ?? "there";
 
   if (isLoading) {
-    return <LoadingState />;
+    return <DashboardSkeleton />;
   }
   if (isError || !data) {
     return <ErrorState message={(error as unknown as AppError | null)?.message} />;

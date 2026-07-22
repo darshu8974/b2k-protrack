@@ -6,6 +6,7 @@ import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import {
   Box,
   Card,
+  Skeleton,
   Stack,
   ToggleButton,
   ToggleButtonGroup,
@@ -15,7 +16,7 @@ import { useState } from "react";
 
 import { KpiCard } from "../../components/data/KpiCard";
 import { ErrorState } from "../../components/feedback/ErrorState";
-import { LoadingState } from "../../components/feedback/LoadingState";
+import { CardSkeleton } from "../../components/feedback/Skeletons";
 import { ImprintBars } from "./components/ImprintBars";
 import { ThroughputChart } from "./components/ThroughputChart";
 import { useReportOverview, useReportThroughput, useReportWorkload } from "./hooks";
@@ -69,7 +70,17 @@ export function ReportsPage() {
       {isError ? (
         <ErrorState message="Unable to load reports." />
       ) : overview.isLoading ? (
-        <LoadingState />
+        <Stack spacing={2}>
+          <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Box key={i} sx={{ flex: 1, minWidth: 180 }}>
+                <CardSkeleton height={40} />
+              </Box>
+            ))}
+          </Stack>
+          <CardSkeleton height={200} />
+          <CardSkeleton height={160} />
+        </Stack>
       ) : (
         <>
           {/* KPI cards */}
@@ -117,7 +128,7 @@ export function ReportsPage() {
               Titles completed per month
             </Typography>
             {throughput.isLoading || !throughput.data ? (
-              <LoadingState />
+              <Skeleton variant="rounded" height={200} />
             ) : (
               <ThroughputChart points={throughput.data.points} />
             )}
@@ -132,7 +143,7 @@ export function ReportsPage() {
               {workload.data?.totalActive ?? 0} active projects
             </Typography>
             {workload.isLoading || !workload.data ? (
-              <LoadingState />
+              <Skeleton variant="rounded" height={160} />
             ) : (
               <ImprintBars items={workload.data.items} />
             )}

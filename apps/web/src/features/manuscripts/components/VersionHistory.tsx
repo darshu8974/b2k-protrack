@@ -16,8 +16,10 @@ import {
 } from "@mui/material";
 
 import { Can } from "../../../components/auth/Can";
+import { useToast } from "../../../components/feedback/ToastProvider";
 import { useDownload } from "../../../hooks/useDownload";
 import { formatBytes } from "../../../lib/format";
+import type { AppError } from "../../../types/api";
 import type { FileVersion } from "../../../types/files";
 import { versionDownloadUrl } from "../api";
 import { useDocumentVersions, useSetCurrentVersion } from "../hooks";
@@ -28,6 +30,7 @@ interface VersionHistoryProps {
 }
 
 export function VersionHistory({ projectId, documentId }: VersionHistoryProps) {
+  const toast = useToast();
   const { data: versions, isLoading } = useDocumentVersions(documentId);
   const setCurrent = useSetCurrentVersion(projectId);
   const { download, downloading } = useDownload();
@@ -88,7 +91,16 @@ export function VersionHistory({ projectId, documentId }: VersionHistoryProps) {
                       variant="outlined"
                       disabled={setCurrent.isPending}
                       onClick={() =>
-                        setCurrent.mutate({ documentId, versionId: version.id })
+                        setCurrent.mutate(
+                          { documentId, versionId: version.id },
+                          {
+                            onSuccess: () => toast.success(`v${version.versionNo} is now the current version.`),
+                            onError: (e) =>
+                              toast.error(
+                                (e as unknown as AppError)?.message ?? "Could not switch versions.",
+                              ),
+                          },
+                        )
                       }
                     >
                       Make current

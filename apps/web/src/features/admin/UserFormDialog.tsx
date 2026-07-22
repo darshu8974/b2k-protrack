@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
+import { useToast } from "../../components/feedback/ToastProvider";
 import type { AppError } from "../../types/api";
 import type { AdminUser, Role } from "./api";
 import { useCreateUser, useUpdateUser } from "./hooks";
@@ -30,6 +31,7 @@ export function UserFormDialog({ open, onClose, roles, user }: Props) {
   const editing = !!user;
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();
+  const toast = useToast();
 
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState(user?.fullName ?? "");
@@ -64,16 +66,29 @@ export function UserFormDialog({ open, onClose, roles, user }: Props) {
     if (editing && user) {
       updateUser.mutate(
         { id: user.id, body: { fullName: fullName.trim(), status } },
-        { onSuccess: close, onError },
+        {
+          onSuccess: () => {
+            close();
+            toast.success(`${fullName.trim()} was updated.`);
+          },
+          onError,
+        },
       );
     } else {
       if (!email.trim() || !fullName.trim() || roleId === "" || password.length < 8) {
         setError("Email, name, role, and a password of at least 8 characters are required.");
         return;
       }
+      const name = fullName.trim();
       createUser.mutate(
-        { email: email.trim(), fullName: fullName.trim(), roleId: Number(roleId), password },
-        { onSuccess: close, onError },
+        { email: email.trim(), fullName: name, roleId: Number(roleId), password },
+        {
+          onSuccess: () => {
+            close();
+            toast.success(`${name} was created.`);
+          },
+          onError,
+        },
       );
     }
   }

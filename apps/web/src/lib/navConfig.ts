@@ -14,10 +14,11 @@ export interface NavSection {
 }
 
 /**
- * Role-shaped navigation. Item paths currently point at /health (the Sprint-0 placeholder);
- * they are repointed to real routes as each feature is built. Reports is restricted to
- * ADMIN / PROJECT_MANAGER / QC / QA (paginators are excluded per the API spec), so it is omitted
- * from the paginator section rather than shown as a forbidden link.
+ * Role-shaped navigation. Only items wired to a real route are listed — the AI Assistant lives
+ * inside each project's "Assistant" tab rather than as a standalone page, so it isn't a top-level
+ * nav item. Reports is restricted to ADMIN / PROJECT_MANAGER / QC / QA (paginators are excluded
+ * per the API spec), so it is omitted from the paginator section rather than shown as a forbidden
+ * link.
  */
 export const navConfig: Record<Role, NavSection[]> = {
   PROJECT_MANAGER: [
@@ -26,16 +27,11 @@ export const navConfig: Record<Role, NavSection[]> = {
       items: [
         { label: "Dashboard", path: "/dashboard", icon: "dashboard" },
         { label: "Projects", path: "/projects", icon: "folder" },
-        { label: "Review queue", path: "/health", icon: "review" },
-        { label: "Team", path: "/health", icon: "team" },
       ],
     },
     {
       group: "INTELLIGENCE",
-      items: [
-        { label: "AI Assistant", path: "/health", icon: "assistant" },
-        { label: "Reports", path: "/reports", icon: "reports" },
-      ],
+      items: [{ label: "Reports", path: "/reports", icon: "reports" }],
     },
   ],
   PAGINATOR: [
@@ -43,14 +39,8 @@ export const navConfig: Record<Role, NavSection[]> = {
       group: "WORKSPACE",
       items: [
         { label: "Dashboard", path: "/dashboard", icon: "dashboard" },
-        { label: "My tasks", path: "/health", icon: "tasks" },
         { label: "Projects", path: "/projects", icon: "folder" },
-        { label: "Production", path: "/health", icon: "production" },
       ],
-    },
-    {
-      group: "INTELLIGENCE",
-      items: [{ label: "AI Assistant", path: "/health", icon: "assistant" }],
     },
   ],
   QC: [
@@ -58,17 +48,12 @@ export const navConfig: Record<Role, NavSection[]> = {
       group: "WORKSPACE",
       items: [
         { label: "Dashboard", path: "/dashboard", icon: "dashboard" },
-        { label: "QC queue", path: "/health", icon: "qa" },
-        { label: "PDF reviews", path: "/health", icon: "review" },
         { label: "Projects", path: "/projects", icon: "folder" },
       ],
     },
     {
       group: "INTELLIGENCE",
-      items: [
-        { label: "AI Assistant", path: "/health", icon: "assistant" },
-        { label: "Reports", path: "/reports", icon: "reports" },
-      ],
+      items: [{ label: "Reports", path: "/reports", icon: "reports" }],
     },
   ],
   QA: [
@@ -76,17 +61,12 @@ export const navConfig: Record<Role, NavSection[]> = {
       group: "WORKSPACE",
       items: [
         { label: "Dashboard", path: "/dashboard", icon: "dashboard" },
-        { label: "Sign-off queue", path: "/health", icon: "qa" },
-        { label: "PDF reviews", path: "/health", icon: "review" },
         { label: "Projects", path: "/projects", icon: "folder" },
       ],
     },
     {
       group: "INTELLIGENCE",
-      items: [
-        { label: "AI Assistant", path: "/health", icon: "assistant" },
-        { label: "Reports", path: "/reports", icon: "reports" },
-      ],
+      items: [{ label: "Reports", path: "/reports", icon: "reports" }],
     },
   ],
   ADMIN: [
@@ -101,10 +81,7 @@ export const navConfig: Record<Role, NavSection[]> = {
     },
     {
       group: "INTELLIGENCE",
-      items: [
-        { label: "AI Assistant", path: "/health", icon: "assistant" },
-        { label: "Reports", path: "/reports", icon: "reports" },
-      ],
+      items: [{ label: "Reports", path: "/reports", icon: "reports" }],
     },
   ],
 };

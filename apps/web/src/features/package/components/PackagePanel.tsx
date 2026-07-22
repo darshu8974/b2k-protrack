@@ -25,7 +25,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../../../api/keys";
 import { Can } from "../../../components/auth/Can";
 import { ErrorState } from "../../../components/feedback/ErrorState";
-import { LoadingState } from "../../../components/feedback/LoadingState";
+import { CardSkeleton } from "../../../components/feedback/Skeletons";
+import { useToast } from "../../../components/feedback/ToastProvider";
 import { useDownload } from "../../../hooks/useDownload";
 import { formatBytes } from "../../../lib/format";
 import { docTypeLabel, PACKAGE_STATUS_COLOR, PACKAGE_STATUS_LABEL } from "../../../lib/labels";
@@ -52,6 +53,7 @@ function StatRow({ label, value }: { label: string; value: string }) {
 
 export function PackagePanel({ projectId }: PackagePanelProps) {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const { data: pkg, isLoading, isError, error } = usePackage(projectId);
   const assemble = useAssemblePackage(projectId);
   const removeItem = useRemovePackageItem(projectId);
@@ -60,7 +62,7 @@ export function PackagePanel({ projectId }: PackagePanelProps) {
   const notFound = (error as unknown as AppError | null)?.status === 404;
 
   if (isLoading) {
-    return <LoadingState />;
+    return <CardSkeleton height={160} />;
   }
 
   if (isError && !notFound) {
@@ -205,7 +207,15 @@ export function PackagePanel({ projectId }: PackagePanelProps) {
                             size="small"
                             aria-label="Remove from package"
                             disabled={removeItem.isPending}
-                            onClick={() => removeItem.mutate(item.id)}
+                            onClick={() =>
+                              removeItem.mutate(item.id, {
+                                onSuccess: () => toast.success(`Removed "${item.label}" from the package.`),
+                                onError: (e) =>
+                                  toast.error(
+                                    (e as unknown as AppError)?.message ?? "Could not remove the item.",
+                                  ),
+                              })
+                            }
                           >
                             <DeleteOutlineIcon fontSize="small" />
                           </IconButton>

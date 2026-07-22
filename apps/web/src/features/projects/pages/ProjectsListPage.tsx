@@ -25,7 +25,7 @@ import { useNavigate } from "react-router-dom";
 import { paths } from "../../../app/router/paths";
 import { Can } from "../../../components/auth/Can";
 import { EmptyState } from "../../../components/feedback/EmptyState";
-import { LoadingState } from "../../../components/feedback/LoadingState";
+import { TableSkeleton } from "../../../components/feedback/Skeletons";
 import { useDebounce } from "../../../hooks/useDebounce";
 import {
   PRIORITY_COLOR,
@@ -174,7 +174,7 @@ export function ProjectsListPage() {
 
       <Card>
         {isError && <Alert severity="warning">{(error as unknown as AppError | null)?.message}</Alert>}
-        {isLoading && <LoadingState />}
+        {isLoading && <TableSkeleton columns={6} />}
         {data && (
           <>
             <Table size="small">

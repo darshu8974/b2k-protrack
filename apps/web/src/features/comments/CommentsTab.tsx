@@ -18,7 +18,9 @@ import { useState } from "react";
 
 import { EmptyState } from "../../components/feedback/EmptyState";
 import { ErrorState } from "../../components/feedback/ErrorState";
+import { useToast } from "../../components/feedback/ToastProvider";
 import { formatRelativeTime } from "../../lib/format";
+import type { AppError } from "../../types/api";
 import type { Comment } from "../../types/comment";
 import { useAuth } from "../auth/useAuth";
 import { useAddComment, useComments, useDeleteComment, useEditComment } from "./hooks";
@@ -26,10 +28,12 @@ import { useAddComment, useComments, useDeleteComment, useEditComment } from "./
 /** The workspace Comments tab: a composer plus a two-level threaded discussion (roots + replies). */
 export function CommentsTab({ projectId }: { projectId: string }) {
   const { user } = useAuth();
+  const toast = useToast();
   const { data, isLoading, isError } = useComments(projectId);
   const addComment = useAddComment(projectId);
   const editComment = useEditComment(projectId);
   const deleteComment = useDeleteComment(projectId);
+  const onError = (e: unknown) => toast.error((e as AppError)?.message ?? "Something went wrong.");
 
   const [newBody, setNewBody] = useState("");
   const [replyTo, setReplyTo] = useState<string | null>(null);
@@ -53,7 +57,7 @@ export function CommentsTab({ projectId }: { projectId: string }) {
   function submitRoot() {
     const body = newBody.trim();
     if (!body) return;
-    addComment.mutate({ body }, { onSuccess: () => setNewBody("") });
+    addComment.mutate({ body }, { onSuccess: () => setNewBody(""), onError });
   }
 
   function submitReply(parentId: string) {
@@ -66,6 +70,7 @@ export function CommentsTab({ projectId }: { projectId: string }) {
           setReplyBody("");
           setReplyTo(null);
         },
+        onError,
       },
     );
   }
@@ -73,7 +78,7 @@ export function CommentsTab({ projectId }: { projectId: string }) {
   function submitEdit(id: string) {
     const body = editBody.trim();
     if (!body) return;
-    editComment.mutate({ id, body }, { onSuccess: () => setEditingId(null) });
+    editComment.mutate({ id, body }, { onSuccess: () => setEditingId(null), onError });
   }
 
   function renderComment(c: Comment, isReply = false) {
@@ -154,7 +159,7 @@ export function CommentsTab({ projectId }: { projectId: string }) {
                       aria-label="Delete comment"
                       onClick={() => {
                         if (window.confirm("Delete this comment?")) {
-                          deleteComment.mutate(c.id);
+                          deleteComment.mutate(c.id, { onError });
                         }
                       }}
                     >

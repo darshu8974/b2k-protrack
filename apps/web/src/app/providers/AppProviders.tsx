@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import { queryClient } from "../../api/queryClient";
 import { ErrorBoundary } from "../../components/feedback/ErrorBoundary";
+import { ToastProvider } from "../../components/feedback/ToastProvider";
 import { AuthProvider } from "../../features/auth/AuthContext";
 import { theme } from "../theme/theme";
 
@@ -14,7 +15,9 @@ export function AppProviders({ children }: { children: ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <AuthProvider>{children}</AuthProvider>
+          <ToastProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </ToastProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </ErrorBoundary>

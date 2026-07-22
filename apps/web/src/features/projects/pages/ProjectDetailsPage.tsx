@@ -13,7 +13,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { ErrorState } from "../../../components/feedback/ErrorState";
-import { LoadingState } from "../../../components/feedback/LoadingState";
+import { CardSkeleton } from "../../../components/feedback/Skeletons";
 import { StagePipeline } from "../../../components/data/StagePipeline";
 import {
   auditEventLabel,
@@ -66,7 +66,19 @@ export function ProjectDetailsPage() {
   const activeTab = tab === "package" && !canSeePackage ? "overview" : tab;
 
   if (isLoading) {
-    return <LoadingState />;
+    return (
+      <Stack spacing={3}>
+        <CardSkeleton height={40} />
+        <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
+          <Box sx={{ flex: 1 }}>
+            <CardSkeleton height={200} />
+          </Box>
+          <Box sx={{ flex: 1 }}>
+            <CardSkeleton height={200} />
+          </Box>
+        </Stack>
+      </Stack>
+    );
   }
   if (isError || !project) {
     return <ErrorState message="Project not found." />;
