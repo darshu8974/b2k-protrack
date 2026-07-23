@@ -20,7 +20,7 @@ _TOOL_NAME = "emit_assistant_reply"
 _TOOL_DESCRIPTION = "Return the scoped assistant reply matching the schema."
 _REPAIR_HINT = (
     "\n\nYour previous response did not match the required schema. "
-    "Return ONLY the structured tool output with a non-empty 'reply' field."
+    "Return ONLY a single JSON object matching the schema, with a non-empty 'reply' field."
 )
 
 

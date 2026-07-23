@@ -1,8 +1,8 @@
 """Provider selection — returns the active LLMProvider based on settings.
 
 The provider is chosen purely by config (``AI_PROVIDER``); orchestration and prompts are
-unchanged when it changes. ``mock`` is the deterministic default; ``claude`` is the real API.
-OpenAI/Gemini adapters register here later with no orchestration change.
+unchanged when it changes. ``mock`` is the deterministic default; ``claude`` and ``gemini`` are
+the real APIs. An OpenAI adapter registers here later with no orchestration change.
 """
 
 from __future__ import annotations
@@ -11,6 +11,7 @@ from app.core.config import get_settings
 from app.core.errors import PermanentError
 from app.providers.base import LLMProvider
 from app.providers.claude_provider import ClaudeProvider
+from app.providers.gemini_provider import GeminiProvider
 from app.providers.mock_provider import MockProvider
 
 
@@ -24,6 +25,13 @@ def get_provider() -> LLMProvider:
         return ClaudeProvider(
             api_key=settings.anthropic_api_key,
             model=settings.claude_model,
+            max_tokens=settings.llm_max_tokens,
+            temperature=settings.llm_temperature,
+        )
+    if provider == "gemini":
+        return GeminiProvider(
+            api_key=settings.gemini_api_key,
+            model=settings.gemini_model,
             max_tokens=settings.llm_max_tokens,
             temperature=settings.llm_temperature,
         )

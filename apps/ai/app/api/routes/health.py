@@ -3,8 +3,8 @@ These are intentionally unauthenticated.
 
 ``/health`` is pure liveness (the process is up). ``/ready`` additionally validates that the
 configured LLM provider is usable — resolving it exercises its construction-time checks (e.g. the
-Claude provider requires an API key), so a misconfigured provider reports NOT_READY (503) rather
-than failing on the first real request.
+Claude/Gemini providers each require their own API key), so a misconfigured provider reports
+NOT_READY (503) rather than failing on the first real request.
 """
 
 from __future__ import annotations

@@ -8,6 +8,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TablePagination,
   TableRow,
@@ -20,10 +21,12 @@ import { EmptyState } from "../../components/feedback/EmptyState";
 import { ErrorState } from "../../components/feedback/ErrorState";
 import { TableSkeleton } from "../../components/feedback/Skeletons";
 import { useDownload } from "../../hooks/useDownload";
-import { auditEventLabel } from "../../lib/labels";
+import { AUDIT_EVENT_LABEL, auditEventLabel } from "../../lib/labels";
 import { useAuditEvents } from "../audit/hooks";
 
-const EVENT_TYPES = ["PROJECT_CREATED", "PROJECT_UPDATED", "MEMBERS_ASSIGNED", "STAGE_CHANGED"];
+// Derived from the shared label map so a new backend event type can never silently disappear
+// from this filter again (previously hardcoded to 4 of 14+ real event types).
+const EVENT_TYPES = Object.keys(AUDIT_EVENT_LABEL);
 
 export function AuditLogPage() {
   const [page, setPage] = useState(0);
@@ -83,6 +86,7 @@ export function AuditLogPage() {
         {isLoading && <TableSkeleton columns={4} />}
         {data && (
           <>
+            <TableContainer sx={{ overflowX: "auto" }}>
             <Table size="small">
               <TableHead>
                 <TableRow>
@@ -115,6 +119,7 @@ export function AuditLogPage() {
                 ))}
               </TableBody>
             </Table>
+            </TableContainer>
             <TablePagination
               component="div"
               count={data.totalElements}

@@ -9,6 +9,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   Tooltip,
@@ -54,6 +55,7 @@ export function VersionHistory({ projectId, documentId }: VersionHistoryProps) {
     download(versionDownloadUrl(version.id), version.fileName, version.id);
 
   return (
+    <TableContainer sx={{ overflowX: "auto" }}>
     <Table size="small">
       <TableHead>
         <TableRow>
@@ -129,5 +131,6 @@ export function VersionHistory({ projectId, documentId }: VersionHistoryProps) {
         ))}
       </TableBody>
     </Table>
+    </TableContainer>
   );
 }

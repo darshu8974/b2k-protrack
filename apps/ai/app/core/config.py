@@ -21,8 +21,9 @@ class Settings(BaseSettings):
     internal_key: str = "dev-internal-key"
 
     # LLM provider abstraction. Defaults to the deterministic mock so the whole pipeline
-    # runs with no external dependency; switch to Claude by setting AI_PROVIDER=claude.
-    # Accepts AI_PROVIDER (documented switch) or AI_LLM_PROVIDER (prefixed form).
+    # runs with no external dependency; switch to Claude by setting AI_PROVIDER=claude, or to
+    # Gemini by setting AI_PROVIDER=gemini. Accepts AI_PROVIDER (documented switch) or
+    # AI_LLM_PROVIDER (prefixed form).
     llm_provider: str = Field(
         default="mock",
         validation_alias=AliasChoices("AI_PROVIDER", "AI_LLM_PROVIDER"),
@@ -34,6 +35,17 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("ANTHROPIC_API_KEY", "AI_ANTHROPIC_API_KEY"),
     )
     claude_model: str = "claude-sonnet-4-6"
+    # The Gemini key, same convention as Claude's: accepts the standard GEMINI_API_KEY (also read
+    # by Google's SDK) or the prefixed AI_GEMINI_API_KEY. Lives ONLY in the AI service env.
+    gemini_api_key: str = Field(
+        default="",
+        validation_alias=AliasChoices("GEMINI_API_KEY", "AI_GEMINI_API_KEY"),
+    )
+    # Accepts the bare GEMINI_MODEL or the prefixed AI_GEMINI_MODEL, same convention as the key.
+    gemini_model: str = Field(
+        default="gemini-2.5-flash",
+        validation_alias=AliasChoices("GEMINI_MODEL", "AI_GEMINI_MODEL"),
+    )
     llm_max_tokens: int = 4096
     llm_temperature: float = 0.2
 
@@ -44,7 +56,11 @@ class Settings(BaseSettings):
     @property
     def active_model(self) -> str:
         """The model identifier reported for the active provider."""
-        return self.claude_model if self.llm_provider == "claude" else self.llm_provider
+        if self.llm_provider == "claude":
+            return self.claude_model
+        if self.llm_provider == "gemini":
+            return self.gemini_model
+        return self.llm_provider
 
 
 @lru_cache

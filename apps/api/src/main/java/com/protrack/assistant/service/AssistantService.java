@@ -161,7 +161,7 @@ public class AssistantService {
 
 	private static ProjectContextDto toContextDto(ProjectContextInfo context) {
 		return new ProjectContextDto(context.projectId().toString(), context.title(),
-				context.publicationType(), context.discipline());
+				context.publicationType(), context.discipline(), context.currentStage());
 	}
 
 	/** A prepared turn: the scope, the raw question, and the chat request to send upstream. */

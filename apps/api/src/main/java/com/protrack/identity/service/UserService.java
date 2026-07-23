@@ -15,10 +15,12 @@ import com.protrack.identity.web.dto.RoleResponse;
 import com.protrack.identity.web.dto.UpdateUserRequest;
 import com.protrack.shared.error.ApiException;
 import com.protrack.shared.error.NotFoundException;
+import com.protrack.shared.events.IdentityEvents;
 import com.protrack.shared.web.PageResponse;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,13 +44,16 @@ public class UserService {
 	private final RoleRepository roleRepository;
 	private final PermissionRepository permissionRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final ApplicationEventPublisher eventPublisher;
 
 	public UserService(UserRepository userRepository, RoleRepository roleRepository,
-			PermissionRepository permissionRepository, PasswordEncoder passwordEncoder) {
+			PermissionRepository permissionRepository, PasswordEncoder passwordEncoder,
+			ApplicationEventPublisher eventPublisher) {
 		this.userRepository = userRepository;
 		this.roleRepository = roleRepository;
 		this.permissionRepository = permissionRepository;
 		this.passwordEncoder = passwordEncoder;
+		this.eventPublisher = eventPublisher;
 	}
 
 	// ── reads ────────────────────────────────────────────────────────────────
@@ -106,6 +111,8 @@ public class UserService {
 				initialsOf(request.fullName()), request.avatarColor());
 		user.addRole(role);
 		userRepository.save(user);
+		eventPublisher.publishEvent(
+				new IdentityEvents.UserCreated(organizationId, adminId, user.getId(), email));
 		return AdminUserResponse.from(user);
 	}
 
@@ -122,6 +129,8 @@ public class UserService {
 				request.avatarColor());
 		if (request.status() != null) {
 			user.changeStatus(request.status());
+			eventPublisher.publishEvent(new IdentityEvents.UserStatusChanged(
+					user.getOrganizationId(), adminId, user.getId(), request.status()));
 		}
 		return AdminUserResponse.from(user);
 	}
@@ -133,6 +142,8 @@ public class UserService {
 			throw selfDeactivation();
 		}
 		user.changeStatus("INACTIVE");
+		eventPublisher.publishEvent(new IdentityEvents.UserStatusChanged(
+				user.getOrganizationId(), adminId, user.getId(), "INACTIVE"));
 	}
 
 	/**
@@ -155,6 +166,8 @@ public class UserService {
 					"This user is linked to projects or activity and cannot be permanently deleted. "
 							+ "Deactivate them instead.");
 		}
+		eventPublisher.publishEvent(new IdentityEvents.UserDeleted(
+				user.getOrganizationId(), adminId, user.getId(), user.getEmail()));
 	}
 
 	@Transactional
@@ -164,6 +177,8 @@ public class UserService {
 				.orElseThrow(() -> new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "INVALID_ROLE",
 						"Unknown role."));
 		user.addRole(role);
+		eventPublisher.publishEvent(new IdentityEvents.RoleAssigned(
+				user.getOrganizationId(), adminId, user.getId(), role.getCode()));
 		return AdminUserResponse.from(user);
 	}
 
@@ -178,6 +193,8 @@ public class UserService {
 					"A user must keep at least one role.");
 		}
 		user.removeRole(role);
+		eventPublisher.publishEvent(new IdentityEvents.RoleRevoked(
+				user.getOrganizationId(), adminId, user.getId(), role.getCode()));
 		return AdminUserResponse.from(user);
 	}
 
@@ -197,6 +214,8 @@ public class UserService {
 				continue;
 			}
 			user.changeStatus(targetStatus);
+			eventPublisher.publishEvent(new IdentityEvents.UserStatusChanged(
+					organizationId, adminId, user.getId(), targetStatus));
 			updated++;
 		}
 		return new BulkUserResult(updated, skipped);

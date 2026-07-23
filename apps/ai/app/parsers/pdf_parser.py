@@ -13,8 +13,9 @@ from io import BytesIO
 from typing import Any
 
 import pdfplumber
-from pypdf import PdfReader
+from pypdf import PasswordType, PdfReader
 
+from app.core.errors import PermanentError
 from app.parsers.models import (
     AccessibilityInfo,
     Counts,
@@ -25,6 +26,26 @@ from app.parsers.models import (
     ParsedDocument,
     PdfFacts,
 )
+
+
+def _open_pdf_reader(content: bytes) -> PdfReader:
+    """Open a PDF, explicitly decrypting it if needed.
+
+    pypdf's ``PdfReader`` only *auto*-tries an empty password when no ``password`` kwarg is passed
+    at all — and even then, a failed empty-password attempt is swallowed silently at construction
+    time; the failure only surfaces later as a cryptic ``FileNotDecryptedError`` deep inside object
+    resolution (e.g. while counting pages). We decrypt explicitly up front so a genuinely
+    password-protected PDF fails fast with a clear, actionable error instead of an unhandled 500.
+    A real password requirement is a permanent, non-retryable input problem — retrying the same
+    file will never succeed without the actual password.
+    """
+    reader = PdfReader(BytesIO(content))
+    if reader.is_encrypted and reader.decrypt("") == PasswordType.NOT_DECRYPTED:
+        raise PermanentError(
+            "The PDF is password-protected and could not be opened. "
+            "Upload a version without a password."
+        )
+    return reader
 
 _PROBLEM_RE = re.compile(r"(?im)^\s*(problem|exercise)\b")
 _REFERENCE_ENTRY_RE = re.compile(r"^\s*(\[\d+\]|\d+\.)\s+\S")
@@ -39,7 +60,7 @@ class PdfParser:
     supported_types: tuple[str, ...] = ("application/pdf", "pdf")
 
     def parse(self, content: bytes, *, filename: str | None = None) -> ParsedDocument:
-        pages = len(PdfReader(BytesIO(content)).pages)
+        pages = len(_open_pdf_reader(content).pages)
 
         text_parts: list[str] = []
         lines: list[tuple[float, str]] = []
@@ -47,7 +68,10 @@ class PdfParser:
         figures = 0
         tables = 0
 
-        with pdfplumber.open(BytesIO(content)) as pdf:
+        # password="" is a no-op for unencrypted PDFs and mirrors _open_pdf_reader's decryption
+        # above (already validated) so pdfplumber's separate pdfminer-based engine can read pages
+        # too — without it, pdfminer would independently refuse an empty-password-encrypted PDF.
+        with pdfplumber.open(BytesIO(content), password="") as pdf:
             for page in pdf.pages:
                 text_parts.append(page.extract_text() or "")
                 figures += len(page.images or [])
@@ -142,7 +166,7 @@ _SUBSET_PREFIX_RE = re.compile(r"^[A-Z]{6}\+")
 
 def extract_pdf_facts(content: bytes) -> PdfFacts:
     """Extract deterministic preflight facts from a production PDF (pypdf + pdfplumber)."""
-    reader = PdfReader(BytesIO(content))
+    reader = _open_pdf_reader(content)
     pages = _page_geometries(reader)
     fonts = _collect_fonts(reader)
     accessibility = _accessibility(reader)
@@ -249,7 +273,7 @@ def _plumb_visuals(
     overflow: dict[int, bool] = {}
     margins: dict[int, float] = {}
     try:
-        with pdfplumber.open(BytesIO(content)) as pdf:
+        with pdfplumber.open(BytesIO(content), password="") as pdf:
             for index, page in enumerate(pdf.pages):
                 try:
                     _plumb_page(index, page, images, overflow, margins)

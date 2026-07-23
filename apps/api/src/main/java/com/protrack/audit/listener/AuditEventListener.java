@@ -5,6 +5,7 @@ import com.protrack.audit.domain.AuditEvent;
 import com.protrack.audit.repository.AuditEventRepository;
 import com.protrack.shared.events.AiEvents;
 import com.protrack.shared.events.FileEvents;
+import com.protrack.shared.events.IdentityEvents;
 import com.protrack.shared.events.PackageEvents;
 import com.protrack.shared.events.ProjectEvents;
 import com.protrack.shared.events.QaEvents;
@@ -29,6 +30,7 @@ public class AuditEventListener {
 	private static final String ENTITY_PREFLIGHT_RUN = "PREFLIGHT_RUN";
 	private static final String ENTITY_QA_ISSUE = "QA_ISSUE";
 	private static final String ENTITY_QA_SIGNOFF = "QA_SIGNOFF";
+	private static final String ENTITY_USER = "USER";
 	private static final String PREFLIGHT_JOB_TYPE = "PDF_PREFLIGHT";
 	private static final String ACTOR_USER = "USER";
 
@@ -149,6 +151,41 @@ public class AuditEventListener {
 		save(event.organizationId(), event.projectId(), event.actorId(), "QA_SIGNED_OFF",
 				ENTITY_QA_SIGNOFF, event.signoffId(),
 				"QA sign-off: %s".formatted(event.decision()), metadata);
+	}
+
+	@EventListener
+	public void onUserCreated(IdentityEvents.UserCreated event) {
+		save(event.organizationId(), null, event.actorId(), "USER_CREATED", ENTITY_USER,
+				event.userId(), "User created (%s)".formatted(event.email()),
+				Map.of("email", event.email()));
+	}
+
+	@EventListener
+	public void onUserDeleted(IdentityEvents.UserDeleted event) {
+		save(event.organizationId(), null, event.actorId(), "USER_DELETED", ENTITY_USER,
+				event.userId(), "User permanently deleted (%s)".formatted(event.email()),
+				Map.of("email", event.email()));
+	}
+
+	@EventListener
+	public void onUserStatusChanged(IdentityEvents.UserStatusChanged event) {
+		save(event.organizationId(), null, event.actorId(), "USER_STATUS_CHANGED", ENTITY_USER,
+				event.userId(), "User status changed to %s".formatted(event.status()),
+				Map.of("status", event.status()));
+	}
+
+	@EventListener
+	public void onRoleAssigned(IdentityEvents.RoleAssigned event) {
+		save(event.organizationId(), null, event.actorId(), "ROLE_ASSIGNED", ENTITY_USER,
+				event.userId(), "Role %s assigned".formatted(event.roleCode()),
+				Map.of("role", event.roleCode()));
+	}
+
+	@EventListener
+	public void onRoleRevoked(IdentityEvents.RoleRevoked event) {
+		save(event.organizationId(), null, event.actorId(), "ROLE_REVOKED", ENTITY_USER,
+				event.userId(), "Role %s revoked".formatted(event.roleCode()),
+				Map.of("role", event.roleCode()));
 	}
 
 	private void record(UUID organizationId, UUID projectId, UUID actorId, String eventType,

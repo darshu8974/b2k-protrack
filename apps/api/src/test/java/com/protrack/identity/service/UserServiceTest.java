@@ -18,11 +18,13 @@ import com.protrack.identity.web.dto.BulkUserRequest;
 import com.protrack.identity.web.dto.BulkUserResult;
 import com.protrack.identity.web.dto.CreateUserRequest;
 import com.protrack.shared.error.ApiException;
+import com.protrack.shared.events.IdentityEvents;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /** Unit tests for {@link UserService} admin operations + self-protection guards (no Docker). */
@@ -31,6 +33,7 @@ class UserServiceTest {
 	private UserRepository userRepository;
 	private RoleRepository roleRepository;
 	private PasswordEncoder passwordEncoder;
+	private ApplicationEventPublisher eventPublisher;
 	private UserService service;
 
 	private final UUID adminId = UUID.randomUUID();
@@ -42,7 +45,9 @@ class UserServiceTest {
 		roleRepository = mock(RoleRepository.class);
 		PermissionRepository permissionRepository = mock(PermissionRepository.class);
 		passwordEncoder = mock(PasswordEncoder.class);
-		service = new UserService(userRepository, roleRepository, permissionRepository, passwordEncoder);
+		eventPublisher = mock(ApplicationEventPublisher.class);
+		service = new UserService(
+				userRepository, roleRepository, permissionRepository, passwordEncoder, eventPublisher);
 
 		User admin = new User(adminId, orgId, "admin@protrack.io", "hash", "Ada Admin", "AA", "#000");
 		when(userRepository.findById(adminId)).thenReturn(Optional.of(admin));
@@ -114,6 +119,57 @@ class UserServiceTest {
 		assertThatThrownBy(() -> service.revokeRole(adminId, targetId, 3))
 				.isInstanceOfSatisfying(ApiException.class,
 						ex -> assertThat(ex.getCode()).isEqualTo("LAST_ROLE"));
+	}
+
+	@Test
+	void createUserPublishesAnAuditEvent() {
+		// Regression test: found during manual QA that admin user-management actions (create,
+		// delete, role assign/revoke, status change) were completely invisible in the audit
+		// log — the whole identity module never published a single domain event, despite the
+		// product's audit trail being a headline SOC 2 / 21 CFR Part 11 feature. Fixed by adding
+		// IdentityEvents and publishing them from every UserService write path.
+		Role qa = role(2, "QA");
+		when(userRepository.existsByEmail("test.user@protrack.io")).thenReturn(false);
+		when(roleRepository.findById(2)).thenReturn(Optional.of(qa));
+		when(passwordEncoder.encode("password123")).thenReturn("bcrypted");
+
+		service.createUser(adminId, new CreateUserRequest(
+				"Test.User@protrack.io", "Test User", 2, "password123", null));
+
+		verify(eventPublisher).publishEvent(org.mockito.ArgumentMatchers.any(
+				IdentityEvents.UserCreated.class));
+	}
+
+	@Test
+	void deleteUserPublishesAnAuditEvent() {
+		UUID targetId = UUID.randomUUID();
+		User target = new User(targetId, orgId, "t@protrack.io", "h", "Target", "TG", "#111");
+		when(userRepository.findWithRolesById(targetId)).thenReturn(Optional.of(target));
+
+		service.deleteUser(adminId, targetId);
+
+		verify(eventPublisher).publishEvent(org.mockito.ArgumentMatchers.any(
+				IdentityEvents.UserDeleted.class));
+	}
+
+	@Test
+	void assignAndRevokeRolePublishAuditEvents() {
+		UUID targetId = UUID.randomUUID();
+		Role qa = role(2, "QA");
+		Role qc = role(5, "QC");
+		User target = new User(targetId, orgId, "t@protrack.io", "h", "Target", "TG", "#111");
+		target.addRole(qa);
+		when(userRepository.findWithRolesById(targetId)).thenReturn(Optional.of(target));
+		when(roleRepository.findById(5)).thenReturn(Optional.of(qc));
+		when(roleRepository.findById(2)).thenReturn(Optional.of(qa));
+
+		service.assignRole(adminId, targetId, 5);
+		verify(eventPublisher).publishEvent(org.mockito.ArgumentMatchers.any(
+				IdentityEvents.RoleAssigned.class));
+
+		service.revokeRole(adminId, targetId, 2);
+		verify(eventPublisher).publishEvent(org.mockito.ArgumentMatchers.any(
+				IdentityEvents.RoleRevoked.class));
 	}
 
 	@Test

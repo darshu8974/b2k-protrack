@@ -29,7 +29,8 @@ const SUGGESTED_PROMPTS = [
 
 /**
  * The scoped AI Assistant tab: a project-bounded chat. Questions and answers are persisted per
- * (project, user); the backend calls the AI service (Claude, or the deterministic mock in dev).
+ * (project, user); the backend calls the AI service (Claude, Gemini, or the deterministic mock
+ * in dev, depending on AI_PROVIDER).
  */
 export function AssistantPanel({ projectId }: { projectId: string }) {
   const { data, isLoading, isError } = useAssistantThread(projectId);

@@ -118,7 +118,12 @@ export function PreflightPanel({ projectId }: { projectId: string }) {
             </Typography>
           }
         >
-          <Button variant="contained" startIcon={<FactCheckIcon />} onClick={run}>
+          <Button
+            variant="contained"
+            startIcon={<FactCheckIcon />}
+            onClick={run}
+            disabled={startPreflight.isPending}
+          >
             Run preflight
           </Button>
         </Can>

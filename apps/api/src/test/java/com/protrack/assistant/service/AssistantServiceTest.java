@@ -58,7 +58,7 @@ class AssistantServiceTest {
 				authorizationService, aiServiceClient, txManager);
 
 		when(projectFacade.findContext(projectId)).thenReturn(Optional.of(new ProjectContextInfo(
-				projectId, orgId, "Quantum Mechanics 3e", "MONOGRAPH", "Physics")));
+				projectId, orgId, "Quantum Mechanics 3e", "MONOGRAPH", "Physics", "AI_ANALYSIS")));
 		when(threadRepository.findByProjectIdAndUserId(projectId, member)).thenReturn(Optional.empty());
 		when(threadRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 		when(messageRepository.findByThreadIdOrderByCreatedAtAsc(any())).thenReturn(List.of());
@@ -85,6 +85,23 @@ class AssistantServiceTest {
 		// A get-or-created thread plus a persisted question and answer.
 		verify(threadRepository).save(any(AssistantThread.class));
 		verify(messageRepository, times(2)).save(any(AssistantMessage.class));
+	}
+
+	@Test
+	void askSendsTheProjectsCurrentStageAsContext() {
+		// Regression test: ProjectContextDto used to omit currentStage entirely, so the assistant
+		// could not answer its own suggested prompt ("What stage is this project in?") — confirmed
+		// live, where Gemini correctly replied that the stage was "not provided in the project
+		// context" because it genuinely wasn't. Fixed by threading currentStage through
+		// ProjectContextInfo -> ProjectContextDto.
+		memberAccess();
+		when(aiServiceClient.assistantChat(any())).thenReturn(new AssistantChatResponse(
+				"It is in AI Analysis.", List.of(), new AssistantChatResponse.UsageDto(10, 20, "mock")));
+
+		service.ask(member, projectId, "What stage is this project in?");
+
+		verify(aiServiceClient).assistantChat(org.mockito.ArgumentMatchers.argThat(
+				req -> "AI_ANALYSIS".equals(req.projectContext().currentStage())));
 	}
 
 	@Test

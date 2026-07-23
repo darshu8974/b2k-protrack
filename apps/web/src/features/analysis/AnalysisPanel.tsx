@@ -139,7 +139,12 @@ export function AnalysisPanel({ projectId, currentStage }: AnalysisPanelProps) {
             </Typography>
           }
         >
-          <Button variant="contained" startIcon={<AutoAwesomeIcon />} onClick={runAnalysis}>
+          <Button
+            variant="contained"
+            startIcon={<AutoAwesomeIcon />}
+            onClick={runAnalysis}
+            disabled={startAnalysis.isPending}
+          >
             Run AI analysis
           </Button>
         </Can>

@@ -2,8 +2,8 @@
 
 Returns fixed, schema-valid structured judgement so the entire pipeline runs end-to-end with no
 external dependency or API key. Given the same request it always returns the same shape and values —
-ideal for local development, CI, and demos. Selected by default (AI_PROVIDER=mock); swap to the real
-Claude provider with AI_PROVIDER=claude.
+ideal for local development, CI, and demos. Selected by default (AI_PROVIDER=mock); swap to a real
+provider with AI_PROVIDER=claude or AI_PROVIDER=gemini.
 
 The task is inferred from the requested ``output_schema`` (manuscript analysis vs. preflight
 phrasing vs. assistant reply) so the single mock serves every vertical; the provider abstraction is
@@ -118,8 +118,8 @@ _MOCK_PREFLIGHT: dict[str, Any] = {
 _MOCK_ASSISTANT: dict[str, Any] = {
     "reply": (
         "Based on the project context provided, here is a concise answer. This is a deterministic "
-        "mock response used for local development and tests — connect the Claude provider "
-        "(AI_PROVIDER=claude) for real, project-specific answers."
+        "mock response used for local development and tests — set AI_PROVIDER=claude or "
+        "AI_PROVIDER=gemini for real, project-specific answers."
     ),
     "citations": ["projectContext.title"],
 }

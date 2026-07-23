@@ -101,6 +101,11 @@ export const AUDIT_EVENT_LABEL: Record<string, string> = {
   PREFLIGHT_FAILED: "Preflight failed",
   ISSUE_DECIDED: "QA issue decided",
   QA_SIGNED_OFF: "QA sign-off",
+  USER_CREATED: "User created",
+  USER_DELETED: "User deleted",
+  USER_STATUS_CHANGED: "User status changed",
+  ROLE_ASSIGNED: "Role assigned",
+  ROLE_REVOKED: "Role revoked",
 };
 
 export const CHECK_KEY_LABEL: Record<string, string> = {

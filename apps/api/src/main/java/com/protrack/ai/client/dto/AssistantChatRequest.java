@@ -16,7 +16,8 @@ public record AssistantChatRequest(
 			String projectId,
 			String title,
 			String publicationType,
-			String discipline) {
+			String discipline,
+			String currentStage) {
 	}
 
 	/** A prior turn of the conversation (role = "user" | "assistant"). */

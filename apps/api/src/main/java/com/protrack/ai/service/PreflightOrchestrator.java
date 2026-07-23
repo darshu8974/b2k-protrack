@@ -1,6 +1,7 @@
 package com.protrack.ai.service;
 
 import com.protrack.ai.domain.AiJob;
+import com.protrack.ai.domain.JobStatus;
 import com.protrack.ai.domain.JobType;
 import com.protrack.ai.repository.AiJobRepository;
 import com.protrack.ai.web.dto.AiJobResponse;
@@ -11,6 +12,7 @@ import com.protrack.project.spi.ProjectFacade.ProjectContextInfo;
 import com.protrack.shared.error.ApiException;
 import com.protrack.shared.error.NotFoundException;
 import com.protrack.shared.events.AiEvents;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -28,6 +30,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class PreflightOrchestrator {
 
 	private static final String PRODUCTION_PDF_DOC_TYPE = "PRODUCTION_PDF";
+	private static final List<String> ACTIVE_STATUSES = List.of(JobStatus.QUEUED.name(), JobStatus.RUNNING.name());
 
 	private final AiJobRepository aiJobRepository;
 	private final FilesFacade filesFacade;
@@ -49,6 +52,12 @@ public class PreflightOrchestrator {
 	public AiJobResponse startPreflight(UUID actorId, UUID projectId) {
 		ProjectContextInfo context = projectFacade.findContext(projectId)
 				.orElseThrow(() -> new NotFoundException("Project not found."));
+
+		if (aiJobRepository.existsByProjectIdAndJobTypeAndStatusIn(
+				projectId, JobType.PDF_PREFLIGHT.name(), ACTIVE_STATUSES)) {
+			throw new ApiException(HttpStatus.CONFLICT, "PREFLIGHT_IN_PROGRESS",
+					"A preflight is already running for this project.");
+		}
 
 		FileRef pdf = filesFacade.listCurrentFilesForProject(projectId).stream()
 				.filter(file -> PRODUCTION_PDF_DOC_TYPE.equals(file.docType()))

@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import pytest
+
+from app.core.errors import PermanentError
 from app.parsers.models import PdfFacts
 from app.parsers.pdf_parser import extract_pdf_facts
 
@@ -38,3 +41,17 @@ def test_extraction_is_deterministic(sample_pdf_bytes: bytes) -> None:
     first = extract_pdf_facts(sample_pdf_bytes)
     second = extract_pdf_facts(sample_pdf_bytes)
     assert first.model_dump() == second.model_dump()
+
+
+def test_permission_only_encrypted_pdf_extracts_like_a_plain_pdf(
+    permission_only_pdf_bytes: bytes,
+) -> None:
+    facts = extract_pdf_facts(permission_only_pdf_bytes)
+    assert facts.page_count == 1
+
+
+def test_password_protected_pdf_raises_a_clean_permanent_error(
+    password_protected_pdf_bytes: bytes,
+) -> None:
+    with pytest.raises(PermanentError, match="password-protected"):
+        extract_pdf_facts(password_protected_pdf_bytes)

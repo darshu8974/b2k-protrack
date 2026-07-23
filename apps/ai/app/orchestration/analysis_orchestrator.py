@@ -26,7 +26,8 @@ from app.services.normalizer import AnalysisNormalizer
 
 _REPAIR_HINT = (
     "\n\nYour previous response did not match the required schema. "
-    "Return ONLY the structured tool output with all required fields present and valid."
+    "Return ONLY a single JSON object matching the schema, with all required fields present "
+    "and valid."
 )
 
 

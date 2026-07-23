@@ -14,6 +14,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   Tooltip,
@@ -182,6 +183,7 @@ export function PackagePanel({ projectId }: PackagePanelProps) {
             </Typography>
           </Box>
         ) : (
+          <TableContainer sx={{ overflowX: "auto" }}>
           <Table size="small">
             <TableHead>
               <TableRow>
@@ -227,6 +229,7 @@ export function PackagePanel({ projectId }: PackagePanelProps) {
               ))}
             </TableBody>
           </Table>
+          </TableContainer>
         )}
       </Card>
     </Stack>

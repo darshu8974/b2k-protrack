@@ -22,6 +22,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TablePagination,
   TableRow,
@@ -230,6 +231,7 @@ export function AdminUsersPage() {
           <TableSkeleton columns={5} />
         ) : (
           <>
+            <TableContainer sx={{ overflowX: "auto" }}>
             <Table size="small">
               <TableHead>
                 <TableRow>
@@ -375,6 +377,7 @@ export function AdminUsersPage() {
                 )}
               </TableBody>
             </Table>
+            </TableContainer>
             <TablePagination
               component="div"
               count={data?.totalElements ?? 0}

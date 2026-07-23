@@ -12,6 +12,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TablePagination,
   TableRow,
@@ -177,6 +178,7 @@ export function ProjectsListPage() {
         {isLoading && <TableSkeleton columns={6} />}
         {data && (
           <>
+            <TableContainer sx={{ overflowX: "auto" }}>
             <Table size="small">
               <TableHead>
                 <TableRow>
@@ -261,6 +263,7 @@ export function ProjectsListPage() {
                 ))}
               </TableBody>
             </Table>
+            </TableContainer>
             <TablePagination
               component="div"
               count={data.totalElements}

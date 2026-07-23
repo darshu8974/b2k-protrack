@@ -37,7 +37,7 @@ public class ProjectFacadeImpl implements ProjectFacade {
 		return projectRepository.findByIdAndDeletedAtIsNull(projectId)
 				.map(project -> new ProjectContextInfo(
 						project.getId(), project.getOrganizationId(), project.getTitle(),
-						project.getPublicationType(), project.getDiscipline()));
+						project.getPublicationType(), project.getDiscipline(), project.getCurrentStage()));
 	}
 
 	@Override

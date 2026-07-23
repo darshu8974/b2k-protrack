@@ -1,7 +1,10 @@
-"""Deterministic parser tests (DOCX)."""
+"""Deterministic parser tests (DOCX + PDF)."""
 
 from __future__ import annotations
 
+import pytest
+
+from app.core.errors import PermanentError
 from app.parsers.docx_parser import DocxParser
 from app.parsers.factory import get_parser
 
@@ -36,3 +39,26 @@ def test_docx_parsing_is_deterministic(sample_docx_bytes: bytes) -> None:
     first = DocxParser().parse(sample_docx_bytes)
     second = DocxParser().parse(sample_docx_bytes)
     assert first.model_dump() == second.model_dump()
+
+
+class TestPdfParserEncryption:
+    """Regression coverage for a bug found during manual end-to-end testing: PdfParser.parse()
+    crashed with an unhandled pypdf.errors.FileNotDecryptedError (-> raw 500) instead of either
+    transparently opening a permission-only-encrypted PDF or reporting a clean, actionable error
+    for a genuinely password-protected one."""
+
+    def test_permission_only_encrypted_pdf_parses_like_a_plain_pdf(
+        self, permission_only_pdf_bytes: bytes
+    ) -> None:
+        from app.parsers.pdf_parser import PdfParser
+
+        parsed = PdfParser().parse(permission_only_pdf_bytes)
+        assert parsed.counts.pages == 1
+
+    def test_password_protected_pdf_raises_a_clean_permanent_error(
+        self, password_protected_pdf_bytes: bytes
+    ) -> None:
+        from app.parsers.pdf_parser import PdfParser
+
+        with pytest.raises(PermanentError, match="password-protected"):
+            PdfParser().parse(password_protected_pdf_bytes)

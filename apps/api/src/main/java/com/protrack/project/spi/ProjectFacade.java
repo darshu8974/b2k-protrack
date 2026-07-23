@@ -16,7 +16,7 @@ public interface ProjectFacade {
 
 	/** Project context for scoping AI work (passed to the AI service, no entity leakage). */
 	record ProjectContextInfo(UUID projectId, UUID organizationId, String title,
-			String publicationType, String discipline) {
+			String publicationType, String discipline, String currentStage) {
 	}
 
 	Optional<ProjectStageInfo> findStageInfo(UUID projectId);

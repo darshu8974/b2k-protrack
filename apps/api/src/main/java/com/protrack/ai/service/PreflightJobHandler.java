@@ -79,10 +79,17 @@ public class PreflightJobHandler implements AiJobHandler {
 				persisted.totalIssues(), persisted.highSeverity()));
 	}
 
-	private static String providerOf(String model) {
+	// Package-private (not private) so the unit test can call it directly.
+	static String providerOf(String model) {
 		if (model == null) {
 			return "unknown";
 		}
-		return model.startsWith("claude") ? "claude" : model;
+		if (model.startsWith("claude")) {
+			return "claude";
+		}
+		if (model.startsWith("gemini")) {
+			return "gemini";
+		}
+		return model.equals("mock") ? "mock" : model;
 	}
 }

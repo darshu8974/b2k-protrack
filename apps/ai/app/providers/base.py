@@ -1,8 +1,8 @@
 """LLM provider abstraction.
 
 A provider turns a (system, user, output_schema) request into validated structured data plus
-usage. Adapters (Claude now; OpenAI/Gemini later) implement this Protocol so orchestration and
-prompts are provider-agnostic.
+usage. Adapters (Claude and Gemini today; OpenAI later) implement this Protocol so orchestration
+and prompts are provider-agnostic.
 """
 
 from __future__ import annotations

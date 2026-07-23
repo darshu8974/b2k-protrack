@@ -73,15 +73,36 @@ public class WorkflowService {
 		String triggeredRole = authorizationService.currentRoles().stream()
 				.filter(allowedRoles::contains).findFirst().orElse(ADMIN_ROLE);
 
-		projectFacade.updateCurrentStage(projectId, toStage, currentUserId);
+		return apply(info, fromStage, toStage, currentUserId, triggeredRole, note, rule);
+	}
+
+	/**
+	 * System-triggered transition for background job completions (e.g. AI analysis finishing),
+	 * where there is no request-bound authenticated principal to check RBAC against — the
+	 * originating action was already authorized when it started. Unlike {@link #transition}, this
+	 * never throws for a stage/rule mismatch: a background completion firing after the project has
+	 * already moved on (or was never at the expected stage) is a no-op, not an error.
+	 */
+	@Transactional
+	public void advanceIfValid(UUID projectId, UUID actedBy, String toStage, String note) {
+		projectFacade.findStageInfo(projectId).ifPresent(info -> {
+			String fromStage = info.currentStage();
+			StageTransition.find(fromStage, toStage)
+					.ifPresent(rule -> apply(info, fromStage, toStage, actedBy, "SYSTEM", note, rule));
+		});
+	}
+
+	private TransitionResponse apply(ProjectStageInfo info, String fromStage, String toStage,
+			UUID actedBy, String triggeredRole, String note, StageTransition rule) {
+		projectFacade.updateCurrentStage(info.projectId(), toStage, actedBy);
 
 		ProjectStageHistory history = historyRepository.save(new ProjectStageHistory(
-				UUID.randomUUID(), projectId, fromStage, toStage, triggeredRole, currentUserId, note));
+				UUID.randomUUID(), info.projectId(), fromStage, toStage, triggeredRole, actedBy, note));
 
 		eventPublisher.publishEvent(new ProjectEvents.ProjectStageChanged(
-				info.organizationId(), projectId, currentUserId, fromStage, toStage, triggeredRole));
+				info.organizationId(), info.projectId(), actedBy, fromStage, toStage, triggeredRole));
 
-		return new TransitionResponse(projectId.toString(), fromStage, toStage, triggeredRole,
+		return new TransitionResponse(info.projectId().toString(), fromStage, toStage, triggeredRole,
 				rule.approvalGate(), history.getOccurredAt());
 	}
 

@@ -51,6 +51,7 @@ PREFLIGHT_RUNS = Counter(
 # Estimates for monitoring/cost-awareness only — tune to your provider contract. Unknown/mock -> 0.
 _PRICE_PER_1K: dict[str, tuple[float, float]] = {
     "claude": (0.003, 0.015),  # Claude Sonnet-class estimate
+    "gemini": (0.0003, 0.0025),  # Gemini 2.5 Flash-class estimate
 }
 
 

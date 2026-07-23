@@ -14,6 +14,7 @@ class ProjectContext(CamelModel):
     title: str | None = None
     publication_type: str | None = None
     discipline: str | None = None
+    current_stage: str | None = None
 
 
 class LLMUsage(CamelModel):
